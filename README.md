@@ -1,14 +1,27 @@
 # causal_diamond
  
-Material for a project of how people learn generative and preventative causal connections in continuous time. 
+material for a project of how people learn generative and preventative causal connections in continuous time. 
 
-# Code
+## code
 
-## Analysis
-For data analysis.
+###  analysis
+analysis the human data vs. model results.
 
-## Experiment
-For running the experiment
+### experiment
+experiment code.
+demo link: https://www.bramleylab.ppls.ed.ac.uk/experiments/tia/diamond_demo/
 
-## Model
-For building normative or algorithm-level models
+### generation
+stimulus generation.
+
+### model
+normative vs. heuristic models.
+
+###myToolkit
+my toolkits for e.g., visualize stimulus, generate gif for instructions.
+
+## data
+experiment data.
+
+##stimulus
+experiment stimulus & normative model's performance on each stimulus.
