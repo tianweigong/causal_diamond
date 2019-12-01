@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="static/css/styles.css">
+	<script src="static/lib/jquery.min.js"></script>
+	<script src="static/js/stimuli.js"></script>
+	<title>Experiment</title>
+</head>
+<body>
+
+	<div id="experiment">
+		<h1>Demo of Experiment</h1>
+		<h1 style="font-size: 20px">The real experiment link could be achieved <a href="https://www.bramleylab.ppls.ed.ac.uk/experiments/tia/diamond_abi/" target="_blank">here</a></h1>
+		<div class="frame_big">
+			<div class="frame_progress">
+				<p id="progress_text">Progress:</p>
+				<div id="progress_container"><div id="progress_indicator"></div></div>
+			</div>
+			<div class="frame_reminder">
+				<ul id="reminder">
+		          <li>Each clip lasts <b>20 seconds</b>, begins with a self-activation of the target component, and <b> can only be played once</b>.</li>
+		          <li>You can mark what connections you think during or after the clip <b>by clicking the grey connection area</b>.</li>
+		          <li>Left click once: generative <span style="background-color:#ededed;font-weight: bold; color: black">-></span>; twice: preventative<span style="background-color:#ededed;font-weight: bold; color: red">-></span>; three times/no click: non-causal <span style="background-color:#ededed;font-weight: bold; color: #ededed">-></span>.</li>
+	        	</ul>
+	        	<p id="trial_title">Device 0 of 19 (PRACTICE)</p>
+			</div>
+			<div id="frame_main">
+				<div class="frame_button" id="frame_button_A">
+		    		<div class="light_button" id="light_button_A"></div>
+		    		<div class="frame_hand" id="frame_hand_A"><img class="hand" src="static/images/hand.png"></div>
+	    		</div>
+				<div class="frame_button" id="frame_button_B">
+		    		<div class="light_button" id="light_button_B"></div>
+		    		<div class="frame_hand" id="frame_hand_B"><img class="hand" src="static/images/hand.png"></div>
+	    		</div>
+	    		<div class="light_bulb" id="frame_bulb"></div>
+	    		<div class="frame_line" id="frame_line_A" onclick="ClickA()">
+		    			<div class="arrow_line" id="arrow_line_A"></div>
+		    			<div class="arrow_point" id="arrow_point_A"></div>
+	    		</div>
+	    		<div class="frame_line" id="frame_line_B" onclick="ClickB()">
+		    			<div class="arrow_line" id="arrow_line_B"></div>
+		    			<div class="arrow_point" id="arrow_point_B"></div>
+	    		</div>
+	    		<!-- <div id="clip_end">This clip has ended.</div> -->
+			</div>
+			<p id="hint">&nbsp</p>
+		</div>
+		<div class ="button_panel">
+			<button type="button" id="exp_start" onclick="TrialStart()">Start</button>
+			<button type="button" id="exp_next" disabled ="true" onclick="TrialNext()">Next</button>
+		</div>
+	</div>
+
+	<div id="instruction">
+		<h1> Instructions</h1>
+		<div id="ins1">
+			<div class="frame_big">
+				<p>In this task, you will watch video clips and then try to figure out the connections between the components of several causal devices. The causal devices look like this:</p>
+				<img id="figure_1" src="static/images/ins1.png">
+				<p>Each device has two <b>control components</b> (buttons on the left) and one <b>target component</b> (diamond shaped on the right). </p>
+			</div>
+		</div>
+		<div id="ins_baserate">
+			<div class="frame_big">
+				<p><b>The target component</b> tends to activate fairly regularly. Each time it activates it lights up yellow for a short time. Watch this video to get some experience of how the target component behaves. </p>
+				<div id="frame_training_baserate">
+				</div>
+				<button class="button_training" id="button_training_baserate" onclick="Training('baserate',26)">Start</button>
+			</div>
+		</div>
+		<div id="ins_baserate_over">
+			<div class="frame_big">
+				<p>So, as you can see, it happens about once every five seconds all by itself.  However, <b>the control components</b> might affect this.</p>
+				<p>Clicking on either control component might have an effect on the target component.</p>
+				<p>There are three ways that a control component might influence the effect component.  It might <b>generate</b> an additional activation of the target.  It might <b>prevent</b> the next activation(s) of the target. Or it might have <b>no effect</b> on the target.</p>
+				<p>Your task will be to figure out what kind of influence the two control components have on the target component for each device.</p>
+			</div>
+		</div>
+		<div id="ins_type_generative">
+			<div class="frame_big">
+	            	<p><b>Generative connection: </b>Generative components will produce an extra activation of the target component, usually within 1-2 seconds.</p>
+	            	<p>Click <b>Start</b> to watch an example of a component with a generative connection.  The hand symbol indicates each time someone activates the control component (remember the target component can regularly light up itself).</p>
+	            	<div class="frame_training" id="frame_training_generative">
+	            	</div>
+	            	<button class="button_training" id="button_training_generative" onclick="Training('generative',24)">Start</button>
+	    	</div>
+		</div>
+		<div id="ins_type_preventative">
+			<div class="frame_big">
+					<p><b>Preventative connection: </b>Preventative components will block all activations of the diamond for a short period (2-4 seconds), no matter whether those activations were produced by a generative connections or happened by self-activation.</p>
+	            	<p>Click <b>Start</b> to watch the preventative connection demo (remember the target component can regularly light up itself).</p>
+	            	<div class="frame_training" id="frame_training_preventative">
+	            	</div>
+	            	<button class="button_training" id="button_training_preventative" onclick="Training('preventative',24)">Start</button>
+			</div>
+		</div>
+		<div id="ins_type_noncausal">
+			<div class="frame_big">
+					<p><b>Non-causal cnnection: </b>Unconnected control components have no impact on the target component.</p>
+	            	<p>Click <b>Start</b> to watch the unconnected control component demo (remember the target component can regularly light up itself).</p>
+	            	<div class="frame_training" id="frame_training_noncausal">
+	            	</div>
+	            	<button class="button_training" id="button_training_noncausal" onclick="Training('noncausal',24)">Start</button>
+			</div>
+		</div>
+		<div id="bonus_reminder">
+			<div class="frame_big">
+				<p> For each device, you will get to watch a video clip in which someone click on each control component several times.</p>
+				<p>Your task is to identify the two connections from the control components to the target component. Each of these two connections can either be generative, preventative, or non-causal (no connection between the specific control component and target component).</p>
+				<p>The total duration of a clip is <b>20 seconds</b>. At the beginning of a clip, the target component will self-activate. After 20 seconds it is not possible to observe further activations of any component even when it should activate.</p>
+				<p>Each clip <b>can only be played once</b>. So please focus while watching the clip and try to understand the relationships between control components and target component. If you feel tired during the experiment, you can take a break between trials.</p>
+				<p>You will get a <b>bonus</b> of 3 cents for each correctly identified connection per device. The maximum payment for completing the 19 devices is thus $1.14 (plus your basic payment of $1.00)</p>
+				<p>You can respond by left clicking the grey area during or after each clip:</p>
+				<img id="how_to_click" src="static/images/ins2.png">
+				<p>You can always change your answers before you submit them. After submitting your answers, you will automatically be directed to the next trial.</p>
+			</div>
+		</div>
+	</div>
+
+</body>
+	<script src="static/js/script.js"></script>
+</html>

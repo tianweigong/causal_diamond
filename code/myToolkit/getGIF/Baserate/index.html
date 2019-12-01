@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="styles.css">
+	<title>Experiment</title>
+</head>
+<body>
+	<div id="experiment">
+		<h1>Experiment</h1>
+		<div class="frame_big">
+			<div class="frame_progress">
+				<p id="progress_text">Progress:</p>
+				<div id="progress_container"><div id="progress_indicator"></div></div>
+			</div>
+			<div class="frame_reminder">
+				<ul id="reminder">
+		          <li>Each clip has 20 seconds, begins with a baserate diamond activation, and <b> can only be played once</b>.</li>
+		          <li>You can mark what connections you think during or after the clip by clicking the grey area.</li>
+		          <li>Left click once: generative; twice: preventative; three times/no click: non-causal.</li>
+	        	</ul>
+	        	<p id="trial_title">Device 0 of 19 (PRACTICE)</p>
+			</div>
+			<div id="frame_main">
+				<div class="frame_button" id="frame_button_A">
+		    		<div class="light_button" id="light_button_A"></div>
+		    		<div class="frame_hand" id="frame_hand_A"><img class="hand" src="Picture1.png"></div>
+	    		</div>
+				<div class="frame_button" id="frame_button_B">
+		    		<div class="light_button" id="light_button_B"></div>
+		    		<div class="frame_hand" id="frame_hand_B"><img class="hand" src="Picture1.png"></div>
+	    		</div>
+	    		<div class="light_bulb" id="frame_bulb"></div>
+	    		<div class="frame_line" id="frame_line_A" onclick="ClickA()">
+		    			<div class="arrow_line" id="arrow_line_A"></div>
+		    			<div class="arrow_point" id="arrow_point_A"></div>
+	    		</div>
+	    		<div class="frame_line" id="frame_line_B" onclick="ClickB()">
+		    			<div class="arrow_line" id="arrow_line_B"></div>
+		    			<div class="arrow_point" id="arrow_point_B"></div>
+	    		</div>
+			</div>
+			<p id="hint">&nbsp</p>
+		</div>
+		<div class ="button_panel">
+			<button type="button" id="exp_start" onclick="TrialStart()">Start</button>
+			<button type="button" id="exp_next" disabled ="true" onclick="TrialNext()">Submit</button>
+		</div>
+	</div>
+
+</body>
+	<script src="script.js"></script>
+
+</html>
