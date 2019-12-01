@@ -17,11 +17,11 @@ stimulus generation.
 ### model
 normative vs. heuristic models.
 
-###myToolkit
+### myToolkit
 my toolkits for e.g., visualize stimulus, generate gif for instructions.
 
 ## data
 experiment data.
 
-##stimulus
+## stimulus
 experiment stimulus & normative model's performance on each stimulus.
