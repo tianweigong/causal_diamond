@@ -78,9 +78,9 @@ a$trial_name=c("GG","GG","PG","PG",
 #simulation result
 #load("../model/structure_time_sensitive/df.simulate.Rda")
 #load("../model/normative_noisy/df.simulate.Rda")
-#load("../model/normative_noisy/df.simulate.Rda")
+load("../model/normative_noisy_large/df.simulate.Rda")
 #load("../model/normative_baseign/df.simulate.Rda")
-load("../model/normative_baseign_noisy/df.simulate.Rda")
+#load("../model/normative_baseign_noisy/df.simulate.Rda")
 
 df.simulate=df.simulate %>% 
   mutate(acc_a=as.integer(A_pro==A_state),
