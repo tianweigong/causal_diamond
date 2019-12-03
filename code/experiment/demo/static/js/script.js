@@ -339,7 +339,7 @@ function DataRecord(){
 function ShowNextTrial(){
 	if (trialNumber>=sti_list.length+1){//debug:>=sti_list.length+1
 		document.getElementById("experiment").style.display="none";
-		ShowSurvey();
+		// ShowSurvey();
 		return;
 	}
 	clickACount=0;
@@ -471,6 +471,7 @@ function randperm(maxValue){
 	return permArray;
 }
 
+ShowExp()
 // For offline running
 // download(JSON.stringify(data), 'data.txt', '"text/csv"');
 // function download(content, fileName, contentType) {

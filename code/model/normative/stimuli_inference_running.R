@@ -1,10 +1,6 @@
 #+ load stimuli -------------------
 #' # load stimuli
 
-# load(file = "demostimulus.Rda")
-# sqc_raw=demostimulus
-# sqc_raw=sqc_raw[-nrow(sqc_raw),]
-
 load(file = "nAgB.Rda")
 sqc_raw=pAnB
 
@@ -24,9 +20,3 @@ sqc_raw_sub_e$ab_idx=rep(0,nrow(sqc_raw_sub_e))
 sqc_raw=rbind(sqc_raw_sub_ab,sqc_raw_sub_e)
 sqc_raw=sqc_raw[order(sqc_raw$time),]
 sqc_raw$total_idx=c(1:nrow(sqc_raw))
-
-#+ inversion-------------------
-#' # inversion for gApB, nApB,nAgB model
-#' we don't have special codes for gApB, nApB,gAnB
-#' if we need to obtain the results, just run the following inversing codes 
-#' and use pAgB, pAnB, nAgB codes

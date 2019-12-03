@@ -20,10 +20,10 @@ library(dplyr)
 library(ggplot2)
 library(Rmisc)
 library(reshape2)
-rm(list=ls())
+#rm(list=ls())
 v.block=c("b8vfi4v7m","w2jgbz0sq","lm7j5xstc","yhnp6ph7i","xhsfpj6kf","nr25kw77x","6zdn5dtje","sljqb7fgn")
 v.block=c(v.block,"ad22y5bii")
-df.raw=read.csv("tia_prevent_pilot.csv")
+df.raw=read.csv("../../data/tia_prevent_pilot.csv")
 
 df.raw=df.raw %>%  subset(!(subject %in% v.block))
 
@@ -49,7 +49,7 @@ for (i in 1:nrow(df.raw)){
 }
 
 # add initial pilot results
-df.ipilot=read.csv("initialpilot.csv")
+df.ipilot=read.csv("../../data/initialpilot.csv")
 df.exp=rbind(df.exp,df.ipilot)
 
 
@@ -75,10 +75,13 @@ a$trial_name=c("GG","GG","PG","PG",
                "GN","GN","PN","PN",
                "NN","NN")
 
-b=df.final %>% subset(trial_id=="15")
-
-
 #simulation result
+#load("../model/structure_time_sensitive/df.simulate.Rda")
+#load("../model/normative_noisy/df.simulate.Rda")
+#load("../model/normative_noisy/df.simulate.Rda")
+#load("../model/normative_baseign/df.simulate.Rda")
+load("../model/normative_baseign_noisy/df.simulate.Rda")
+
 df.simulate=df.simulate %>% 
   mutate(acc_a=as.integer(A_pro==A_state),
          acc_b=as.integer(B_pro==B_state),
@@ -113,6 +116,8 @@ ggplot(pic.sub,aes(x=trial_id, y=acc,fill=variable))+
               position=position_dodge(.9))+
   geom_point(pic.sim,mapping =aes(x=trial_id, y=acc,fill=variable),stat="identity",
              position=position_dodge(.9))+
+  geom_hline(yintercept=0.33)+
+  geom_hline(yintercept=0.67)+
   scale_x_continuous(breaks = c(1:18), 
                      labels = c("GG","GG","PG","PG",
                                 "NG","NG","GP","GP",
@@ -131,7 +136,7 @@ pic.total=data.frame(pic.sim$acc,pic.sub$acc,hint)
 cor.test(pic.sim$acc,pic.sub$acc)
 
 ggplot(pic.total,aes(x=pic.sim.acc, y=pic.sub.acc,color=hint))+
-  geom_point(shape=18,size=3)+
+  geom_point(shape=18,size=3,position =position_dodge(width = 0.05))+
   scale_colour_manual(values = c("#E69F00", "#999999","#56B4E9"))+
   xlab("Local Computations Model Accuracy")+
   ylab("Human Accuracy")+
@@ -146,4 +151,4 @@ ggplot(pic.total,aes(x=pic.sim.acc, y=pic.sub.acc,color=hint))+
     # Change axis line
     axis.line = element_line(colour = "black")
   )+
-  annotate("text", x = 0.15, y = 1.0, label = "italic('r = .477, n = 14')",parse=TRUE)
+  annotate("text", x = 0.15, y = 1.0, label = "italic('r = , n = ')",parse=TRUE)
