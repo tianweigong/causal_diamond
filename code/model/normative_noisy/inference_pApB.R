@@ -98,3 +98,4 @@ if (whole_prob<max(prob_each_path)){
 }
 plot(prob_each_path)
 model_pApB=whole_prob
+

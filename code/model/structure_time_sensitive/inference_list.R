@@ -9,20 +9,21 @@ library(matrixStats)
 #' # set parameters
 #' please make sure that the parameters are identical to stimuli generation file.
 
-k_e=25
-r_e=5 #e->e: m=5,var=0.25 -> 1
+k_e=12.5
+r_e=2.5 #e->e: m=5,var=0.25 -> 2
 
-k_ae=9
-r_ae=3 #preventative a->e: m=3,var=0.25 -> 1
-k_be=2.25
-r_be=1.5  #generative b->e: m=1.5,var=0.25 -> 1
+k_ae=4.5
+r_ae=1.5 #preventative a->e: m=3,var=0.25 -> 2
+
+k_be=1.125
+r_be=0.75  #generative b->e: m=1.5,var=0.25 -> 2
 
 trial_end=20
-sim_subject=10 #for one generative one preventative
+sim_subject=1000 #for one generative one preventative
 
 ncs_uni=1/(k_e/r_e)
 ncs_rate=20
-mmr_sec=6
+mmr_sec=5
 
 
 #+ load stimuli -------------------
@@ -208,3 +209,4 @@ b_pro="N" # REMEMBER TO CHECK IT
 load(file = paste(filepath,sti_name,sti_no,"/",sti_name,".Rda",sep = ""))
 sqc=get(sti_name)
 sqc$total_idx=c(1:nrow(sqc))
+

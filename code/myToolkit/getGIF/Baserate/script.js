@@ -1,7 +1,7 @@
 var trial_sqc ={"obj":["E","E","E","E","E","E","E"],"time":["0","4.6","9.7","14.4","19.5","23.8","29.4"]};
 
 var trialNumber=0;
-var onFor=500;
+var onFor=350;
 var clipLength=20*1000;
 var onColor="#FFD966";
 var offColor="#D9D9D9";

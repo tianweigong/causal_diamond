@@ -23,7 +23,7 @@ library(ggplot2)
 #+ test parameters -------------------
 #' # test parameters
 data.frame(Time = seq(0, 10, length.out = 1000)) %>%
-  mutate(exp = dgamma(Time, shape = 36, rate = 12)) %>%
+  mutate(exp = dgamma(Time, shape = 12.5, rate =2.5 )) %>%
   gather(fun, Probability, c(exp)) %>%
   mutate(Form = factor(fun, levels = c('exp'),
                        labels = c('demo'))) %>%

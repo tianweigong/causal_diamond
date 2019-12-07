@@ -1,22 +1,22 @@
-preFlag=1;
+// preFlag=1;
 //generative
 // 2.6 4.8 8.3 11
 // 1.5 1.7 2.1 1.7
 //"2.6","4.1","4.8","6.5","8.3","10.4","11","12.7"
-//var trial_sqc ={"obj":["E","A","E","A","E","E","A","E","E","A","E","E","A","E","E"],
-//"time":["0","2.6","3.4","4.8","5.75","6.45","8.3","9.4","11","13.2","15","16","17.7","19","20.6"]};
+var trial_sqc ={"obj":["E","A","E","A","E","E","A","E","E","A","E","E","A","E","E"],
+"time":["0","2.6","3.4","4.8","5.75","6.45","8.3","9.4","11","13.2","15","16","17.7","19","20.6"]};
 //.      e.  a.    e.    a.    e.     e.     A.     EA.  E.   A.     EA.   A.    		A.
 //preventative
 
- preAct=0;
- var trial_sqc ={"obj":["E","A","E","A","E","A","E"],
- "time":["0","3.251827928","10.55388201","11.28662864","15.59604984","18.71481644","22.1"]};
- var block_time=["3.0","2.8","3.2"];
+ // preAct=0;
+ // var trial_sqc ={"obj":["E","A","E","A","E","A","E"],
+ // "time":["0","3.251827928","10.55388201","11.28662864","15.59604984","18.71481644","22.1"]};
+ // var block_time=["3.0","2.8","3.2"];
 // //non-causal
-// var trial_sqc ={"obj":["E","A","E","A","A","E","A","E"],
-// "time":["0","3.251827928","10.55388201","11.28662864","13.2","15.59604984","18.71481644","22.1"]};
+// var trial_sqc ={"obj":["E","A","E","E","A","A","E","A","E"],
+// "time":["0","3.251827928","5.6","10.55388201","11.28662864","14","15.59604984","18.71481644","21.1"]};
 var trialNumber=0;
-var onFor=500;
+var onFor=350;
 var clipLength=20*1000;
 var onColor="#FFD966";
 var offColor="#D9D9D9";
@@ -30,6 +30,13 @@ var typeFlag=0;
 var data=new Array;
 var beginTime=0;
 var myOrder=undefined;
+
+var connect_hint_color=["#ababab","black","red"];
+var connect_state=["N","G","P"];
+var connect_name=["Non-causal","Generative","Preventative"];
+
+
+
 document.getElementById("frame_hand_A").style.visibility="hidden";
 
 function TrialStart(){
@@ -59,7 +66,6 @@ function TurnOnProcess(dot){
 }
 
 function ShowHint(){
-
 	document.getElementById("inner_hint").innerHTML = "(Period of Prevention...)";
 	setTimeout(HideHint,block_time[preAct]*1000);
 	preAct=preAct+1;
@@ -87,6 +93,9 @@ function ClickA(){
 	clickACount=clickACount+1;
 	document.getElementById("arrow_line_A").style.background=connect_color[clickACount % 3];
 	document.getElementById("arrow_point_A").style.borderLeftColor=connect_color[clickACount % 3];
+	document.getElementById("arrow_hint_A").innerHTML=connect_name[clickACount % 3];
+	document.getElementById("arrow_hint_A").style.color=connect_hint_color[clickACount % 3];
+
 	data[data.length]={order:trialNumber,
 		trial_type:trial_sqc.type,
 		id:trial_sqc.id,

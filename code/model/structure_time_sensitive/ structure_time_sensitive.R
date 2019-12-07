@@ -55,21 +55,38 @@ colnames(guess)=c("type","prob")
 rownames(guess)=c("A","B")
 guess$type="N"
 
-past_prob=ncs_uni
+pflag=0
 for (i in 1:nrow(sqc)){
   local_sqc=sqc[1:i,]
   local_sqc=local_sqc %>% subset(time > sqc$time[i]-mmr_sec) #limited menmory storage
   local_ab=local_sqc %>% subset(obj %in% c("A","B"))
-  ###preventative
-  if (!("E" %in% local_sqc$obj)){
-    sim_base=local_sqc$time[1]+rgamma(1,k_e,r_e)
-    
+  
+  if (sqc$time[i]>6 & sqc$time[i]<8 & (!("E" %in% local_sqc$obj))){ #could noisify here
+    pflag=1
+  }
+  
+  if (sqc$time[i]>11 & sqc$time[i]<13 & (!("E" %in% local_sqc$obj))){ #could noisify here
+    pflag=2
+  }
+  
+  if (sqc$time[i]>16 & sqc$time[i]<18 & (!("E" %in% local_sqc$obj))){ #could noisify here
+    pflag=3
+  }
+  
+  if (pflag!=0){
+    sim_base=rgamma(1,k_e*pflag,r_e)
     local_ab$prevent= 1-pgamma(sim_base-local_ab$time,k_ae,r_ae)
     local_ab$prevent[local_ab$prevent==1]=0
+    # Sys.sleep(0.1)
+    # print(max(local_ab$prevent))
+    # flush.console()
+    
     act_prevent=local_ab$obj[which.max(local_ab$prevent)] %>% as.character()
     cdd_prevent=setdiff(rownames(guess),c(act_prevent))
-    if (guess[act_cause,"type"]!="G"){
+    
+    if (guess[cdd_prevent,"type"]!="G"){
       assignP(act_prevent,1)
+      pflag=0
       next
     }
     
@@ -77,10 +94,11 @@ for (i in 1:nrow(sqc)){
     
     if (nrow(local_cdd)>0 & guess[cdd_prevent,"type"]!="G"){
       assignP(cdd_prevent,1)
+      pflag=0
       next
     }
-    
   }
+  
   
   ##generative
   

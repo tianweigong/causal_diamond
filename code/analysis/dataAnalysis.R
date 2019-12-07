@@ -28,7 +28,7 @@ library(plyr)
 #' # load subject data
 v.block=c("b8vfi4v7m","w2jgbz0sq","lm7j5xstc","yhnp6ph7i","xhsfpj6kf","nr25kw77x","6zdn5dtje","sljqb7fgn")
 v.block=c(v.block,"ad22y5bii")
-df.raw=read.csv("../../data/tia_prevent_pilot.csv")
+df.raw=read.csv("../../data/tia_prevent_test.csv")
 
 df.raw=df.raw %>%  subset(!(subject %in% v.block))
 
@@ -71,7 +71,7 @@ df.final$source="subject"
 
 #+ summary subject data -------------------
 #' # summary subject data
-a=summarySE(df.final,measurevar = "acc_device",groupvars = "trial_id")
+a=summarySE(df.final,measurevar = "acc_connect",groupvars = "subject")
 a$sd=NULL
 a$ci=NULL
 a$se=NULL
@@ -84,8 +84,8 @@ a$trial_name=c("GG","GG","PG","PG",
 #' # load model data
 
 #simulation result
-load("../model/structure_time_sensitive/df.simulate.Rda")
-#load("../model/normative_noisy/df.simulate.Rda")
+#load("../model/structure_time_sensitive/df.simulate.Rda")
+load("../model/normative_noisy/df.simulate.Rda")
 #load("../model/normative_noisy_large/df.simulate.Rda") #no difference from middle-noisy
 #load("../model/normative_noisy_small/df.simulate.Rda") #no good as middle-noisy
 #load("../model/normative_baseign/df.simulate.Rda") 
@@ -228,15 +228,20 @@ pic.sim=pic.sim[
   ]
 
 #plot the bar 
-pic.label=c("1"="GG","2"="GG","3"="PG","4"="PG","5"="NG","6"="NG",
-            "7"="GP","8"="GP","9"="PP","10"="PP","11"="NP","12"="NP",
-            "13"="GN","14"="GN","15"="PN","16"="PN","17"="NN","18"="NN")
+pic.label=c("1"="GG1","2"="GG2","3"="PG1","4"="PG2","5"="NG1","6"="NG2",
+            "7"="GP1","8"="GP2","9"="PP1","10"="PP2","11"="NP1","12"="NP2",
+            "13"="GN1","14"="GN2","15"="PN1","16"="PN2","17"="NN1","18"="NN2")
 
 ggplot(pic.sub,aes(x=cpn, y=ratio,fill=state))+
   geom_bar(stat='identity',position="dodge",colour="black")+
   geom_point(pic.sim,mapping =aes(x=cpn, y=ratio,fill=state),stat="identity",
              position=position_dodge(.9))+
   facet_wrap(~trial_id,nrow=3,labeller = as_labeller(pic.label))
+
+ggplot(pic.sim,aes(x=cpn, y=ratio,fill=state))+
+  geom_bar(stat='identity',position="dodge",colour="black")+
+  facet_wrap(~trial_id,nrow=3,labeller = as_labeller(pic.label))+
+  xlab("component")
 
 #plot the scatter
 hint=rep(c("Generative","Non-causal","Preventative"),18*2)
@@ -245,11 +250,11 @@ pic.total=data.frame(pic.sim$ratio,pic.sub$ratio,hint)
 
 
 cor.test(pic.sim$ratio,pic.sub$ratio)
-
+summary(lm(pic.sim$ratio ~ pic.sub$ratio))
 ggplot(pic.total,aes(x=pic.sim.ratio, y=pic.sub.ratio,color=hint))+
   geom_point(shape=18,size=3,position =position_dodge(width = 0.05))+
   scale_colour_manual(values = c("#E69F00", "#999999","#56B4E9"))+
-  xlab("Ideal-noisy Model Ratio")+
+  xlab("STS Model Ratio")+
   ylab("Human Ratio")+
   labs(color='Correct answer') +
   geom_smooth(aes(x=pic.sim.ratio,y=pic.sub.ratio),method= "lm",formula=y~x,color="black")+
@@ -262,4 +267,5 @@ ggplot(pic.total,aes(x=pic.sim.ratio, y=pic.sub.ratio,color=hint))+
     # Change axis line
     axis.line = element_line(colour = "black")
   )+
-  annotate("text", x = 0.05, y = 1.0, label = "italic('r = .902')",parse=TRUE)
+  annotate("text", x = 0.10, y = 1.0, label = "italic('r =.495')",parse=TRUE)
+
