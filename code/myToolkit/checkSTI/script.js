@@ -1,4 +1,4 @@
-var onFor = 500; //How long should each node light up?
+var onFor = 350; //How long should each node light up?
 var baseColor = "0xB3B3B3";
 var blockedColor = "0x000000";
 var activeColor = "0xFFD000";

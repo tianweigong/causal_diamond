@@ -9,7 +9,6 @@ analysis the human data vs. model results.
 
 ### experiment
 experiment code.
-demo link: https://www.bramleylab.ppls.ed.ac.uk/experiments/tia/diamond_demo/
 
 ### generation
 stimulus generation.

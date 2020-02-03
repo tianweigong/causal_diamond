@@ -43,6 +43,15 @@ input[type="radio"] {
 	margin-left: 30px;
 }
 /*class*/
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */
+}
 .frame_big{
 	width: 1000px;
 	margin-left: auto;
@@ -73,10 +82,10 @@ input[type="radio"] {
 	height: 258px;
 	border: 1px solid black;
 	margin: auto;
-	background-color: white; 
+	background-color: white;
 }
 .example_img{
-	width: 500px;
+	width: 470px;
 	border: 0px;
 }
 .light_button{
@@ -130,6 +139,12 @@ input[type="radio"] {
 	border-left: 30px solid #ededed;
 	margin-top: 5px;
 	margin-left:170px;
+	position: absolute;
+}
+.arrow_hint{
+	text-align: center;
+	line-height: 0;
+	margin: 15px;
 }
 /*id*/
 #figure_1{
@@ -154,7 +169,7 @@ input[type="radio"] {
 }
 #frame_training_baserate{
 	width: 500px;
-	height: 335px;
+	height: 350px;
 	border: 1px solid black;
 	margin: auto;
 	background-color: white; 
@@ -168,14 +183,14 @@ input[type="radio"] {
 	float: right;
 }
 #progress_container{
-	width: 900px;
+	width: 855px;
 	height: 20px;
 	background-color: white;
 	float: right;
 }
 
 #progress_indicator{
-	width: 45px;
+	width: 0px;
 	height: 20px;
 	background-color: #6669ff;
 }

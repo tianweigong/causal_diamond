@@ -4,26 +4,36 @@ var train_types=["baserate","generative","preventative","noncausal"]
 var check_ans=new Array(check_keys.length);
 var insPage=0;
 var checkFlag=0;
-var trialNumber=0;
-var onFor=500;
-var clipLength=20;
+var trialNumber=-1;//begin with click training(-1), and then practice trial(0)
+var onFor=350;
+var clipLength=20+0.5;
 var onColor="#FFD966";
 var offColor="#D9D9D9";
 var clickACount=0;
 var clickBCount=0;
 var connect_color=["#ededed","black","red"];
+var connect_hint_color=["#ababab","black","red"];
 var connect_state=["N","G","P"];
+var connect_name=["Non-causal","Generative","Preventative"];
 var pracFlag=1;
 var baserateFlag=0;
 var gFlag=0;
 var pFlag=0;
 var nFlag=0;
 var typeFlag=0;
+var endFlag=0;
+var trainFlag=1;
 var data=new Array;
 var beginTime=0;
 var myOrder=undefined;
 var myPosition=0;
-var myID=0;
+var myABI=0;
+
+var connect_array=[0,1,2];
+var trial_array=[1,2,3,4,5,6,
+				7,8,9,10,11,12,
+				13,14,15,16,17,18];
+var myClick=shuffle(connect_array);
 
 // document.getElementById("instruction").style.display="none";
 // document.getElementById("experiment").style.display="none";
@@ -34,76 +44,78 @@ document.getElementById("frame_hand_B").style.visibility = "hidden";
 document.getElementById("frame_hand_A").style.visibility = "hidden";
 //document.getElementById("clip_end").style.visibility="hidden"
 
-function ConsentClick(){
-	document.getElementById("instruction").style.display="block";
-	document.getElementById("consent").style.display="none";
-	for(var i=1;i<ins_pages.length;i++){
-		document.getElementById(ins_pages[i]).style.display="none";
-	}
-}
+// ipcheck();
 
-function InsPrevClick(){
-	for(var i=0;i<ins_pages.length;i++){
-		document.getElementById(ins_pages[i]).style.display="none";
-	}
-	insPage=insPage-1;
-	document.getElementById(ins_pages[insPage]).style.display="block";
-	document.getElementById("ins_forward").disabled=false;
-	document.getElementById("ins_backward").disabled=false;
-	if (insPage==0){
-		document.getElementById("ins_backward").disabled=true;
-	}
-}
+// function ConsentClick(){
+// 	document.getElementById("instruction").style.display="block";
+// 	document.getElementById("consent").style.display="none";
+// 	for(var i=1;i<ins_pages.length;i++){
+// 		document.getElementById(ins_pages[i]).style.display="none";
+// 	}
+// }
 
-function InsNextClick(){
-	if (ins_pages[insPage]=="welldone"){ //begin the experiment
-		ShowExp();
-		return;
-	}
-	if (ins_pages[insPage]=="check"){
-		CheckReturn();
-		return;
-	}
-	for(var i=0;i<ins_pages.length;i++){
-		document.getElementById(ins_pages[i]).style.display="none";
-	}
-	insPage=insPage+1;
-	document.getElementById(ins_pages[insPage]).style.display="block";
-	if (insPage>0){
-		document.getElementById("ins_backward").disabled=false;
-	}
-	document.getElementById("ins_forward").disabled=false;
-	document.getElementById("ins_backward").disabled=false;
-	if (ins_pages[insPage]=="check" && checkFlag==0){
-		document.getElementById("ins_forward").disabled=true;
-	}
-	if (ins_pages[insPage]=="ins_baserate" && baserateFlag==0){
-		document.getElementById("ins_forward").disabled=true;
-	}
-	if (ins_pages[insPage]=="ins_type_generative" && (!gFlag)){
-		document.getElementById("ins_forward").disabled=true;
-	}
-	if (ins_pages[insPage]=="ins_type_preventative" && (!pFlag)){
-		document.getElementById("ins_forward").disabled=true;
-	}
-	if (ins_pages[insPage]=="ins_type_noncausal" && (!nFlag)){
-		document.getElementById("ins_forward").disabled=true;
-	}
-}
+// function InsPrevClick(){
+// 	for(var i=0;i<ins_pages.length;i++){
+// 		document.getElementById(ins_pages[i]).style.display="none";
+// 	}
+// 	insPage=insPage-1;
+// 	document.getElementById(ins_pages[insPage]).style.display="block";
+// 	document.getElementById("ins_forward").disabled=false;
+// 	document.getElementById("ins_backward").disabled=false;
+// 	if (insPage==0){
+// 		document.getElementById("ins_backward").disabled=true;
+// 	}
+// }
+
+// function InsNextClick(){
+// 	if (ins_pages[insPage]=="welldone"){ //begin the experiment
+// 		ShowExp();
+// 		return;
+// 	}
+// 	if (ins_pages[insPage]=="check"){
+// 		CheckReturn();
+// 		return;
+// 	}
+// 	for(var i=0;i<ins_pages.length;i++){
+// 		document.getElementById(ins_pages[i]).style.display="none";
+// 	}
+// 	insPage=insPage+1;
+// 	document.getElementById(ins_pages[insPage]).style.display="block";
+// 	if (insPage>0){
+// 		document.getElementById("ins_backward").disabled=false;
+// 	}
+// 	document.getElementById("ins_forward").disabled=false;
+// 	document.getElementById("ins_backward").disabled=false;
+// 	if (ins_pages[insPage]=="check" && checkFlag==0){
+// 		document.getElementById("ins_forward").disabled=true;
+// 	}
+// 	if (ins_pages[insPage]=="ins_baserate" && baserateFlag==0){
+// 		document.getElementById("ins_forward").disabled=true;
+// 	}
+// 	if (ins_pages[insPage]=="ins_type_generative" && (!gFlag)){
+// 		document.getElementById("ins_forward").disabled=true;
+// 	}
+// 	if (ins_pages[insPage]=="ins_type_preventative" && (!pFlag)){
+// 		document.getElementById("ins_forward").disabled=true;
+// 	}
+// 	if (ins_pages[insPage]=="ins_type_noncausal" && (!nFlag)){
+// 		document.getElementById("ins_forward").disabled=true;
+// 	}
+// }
 
 function Training(train,trainLength){
-	// document.getElementById("button_training_"+train).disabled=true;
-	// document.getElementById("ins_forward").disabled=true;
-	// document.getElementById("ins_backward").disabled=true;
+	document.getElementById("button_training_"+train).disabled=true;
+	document.getElementById("ins_forward").disabled=true;
+	document.getElementById("ins_backward").disabled=true;
 
-	document.getElementById("frame_training_"+train).innerHTML="<img class='example_img' src='static/images/"+train+".gif'>"
+	document.getElementById("frame_training_"+train).innerHTML="<p align='center'><img class='example_img' src='static/images/"+train+".gif'></p>"
 	setTimeout(TrainingEnd,trainLength*1000,train);
 }
 
 function TrainingEnd(train){
 	document.getElementById("frame_training_"+train).innerHTML="";
 	for (var i=0; i<train_types.length;i++){
-		// document.getElementById("button_training_"+train_types[i]).disabled=false;
+		document.getElementById("button_training_"+train_types[i]).disabled=false;
 	}
 	if (train=="baserate"){
 		baserateFlag=1
@@ -115,8 +127,8 @@ function TrainingEnd(train){
 	}else if (train=="noncausal"){
 		nFlag=1;
 	}
-	// document.getElementById("ins_forward").disabled=false;
-	// document.getElementById("ins_backward").disabled=false;
+	document.getElementById("ins_forward").disabled=false;
+	document.getElementById("ins_backward").disabled=false;
 }
 
 function CheckClick(){
@@ -156,18 +168,16 @@ function CheckReturn(){
 	}
 }
 
+ShowExp()
 function ShowExp(){
-	myID=Math.random().toString(36).substring(2, 11);
 	while (1){
-		myOrder=randperm(sti_list.length);
+		myOrder=shuffle(trial_array);
 		if (myOrder.slice(1).map(function(n, i) {return n - myOrder[i];}).indexOf(1)==-1){
 			//console.log(myOrder);
 			break;
 		}
 	}
 	myPosition=Number(Math.random()>0.5)
-	// console.log(myPosition);
-	// console.log(myID);
 	if (myPosition) {
 		document.getElementById("frame_button_A").style.marginTop="260px";
 		document.getElementById("frame_button_B").style.marginTop="35px";
@@ -181,22 +191,33 @@ function ShowExp(){
 	}
 	//prepare a ramdon seed for each participant
 	// document.getElementById("instruction").style.display="none";
-	document.getElementById("experiment").style.display="block";
+	// document.getElementById("experiment").style.display="block";
 	document.getElementById("hint").innerHTML="Click <b>Start</b> to watch the clip for this device."
+	ClickTraining()
+}
+
+function ClickTraining(){
+	document.getElementById("exp_start").disabled=true;
+	document.getElementById("arrow_hint_A").innerHTML="<span style='font-size:15px;font-weight:bold;color:black'>Click Here</span>"
+	document.getElementById("arrow_hint_B").innerHTML="<span style='font-size:15px;font-weight:bold;color:black'>Click Here</span>"
+	document.getElementById("frame_progress").style.display="none";
+	document.getElementById("frame_reminder").style.display="none";
+	document.getElementById("hint").innerHTML="Please click each connection more than 6 times to continue."
 }
 
 function TrialStart(){
 	document.getElementById("exp_start").disabled=true;
 	document.getElementById("hint").innerHTML="Trial ongoing..."
-	//document.getElementById('frame_line_A').style.pointerEvents = 'auto';
-	//document.getElementById('frame_line_B').style.pointerEvents = 'auto';
+	document.getElementById("arrow_hint_A").innerHTML="<span style='font-size:30px;font-weight:bold'>?</span>"
+	document.getElementById("arrow_hint_B").innerHTML="<span style='font-size:30px;font-weight:bold'>?</span>"
+	document.getElementById('frame_line_A').style.pointerEvents = 'auto';
+	document.getElementById('frame_line_B').style.pointerEvents = 'auto';
 	beginTime=Date.now();
+	// console.log(myOrder[trialNumber-1])
 	if (trialNumber==0){
 		trial_sqc=prac;
-	}else if (trialNumber>sti_list.length){
-		trial_sqc=undetect;
 	}else{
-		trial_sqc=sti_list[myOrder[trialNumber-1]];
+		trial_sqc=sti_list[myOrder[trialNumber-1]-1];
 	}
 
 	for (var i = 0; i <trial_sqc.time.length; i++) {
@@ -226,9 +247,12 @@ function TurnOffProcess(dot){
 
 function ClipEnd(){
 	//document.getElementById("clip_end").style.visibility="visible";
-	document.getElementById("hint").innerHTML="Decide your answer and click <b>Next</b> to move onto the next device."
-	document.getElementById("exp_next").disabled=false;
+	document.getElementById("hint").innerHTML="<b>Decide your answer</b> by clicking on two connections and click <b>Next</b> to move onto the next device."
 	//setTimeout(ClipEndHint,1000);
+	endFlag=1;
+	if (clickACount && clickBCount){
+		document.getElementById("exp_next").disabled=false;
+	}
 }
 
 // function ClipEndHint(){
@@ -237,9 +261,24 @@ function ClipEnd(){
 
 function ClickA(){
 	clickACount=clickACount+1;
-	document.getElementById("arrow_line_A").style.background=connect_color[clickACount % 3];
-	document.getElementById("arrow_point_A").style.borderLeftColor=connect_color[clickACount % 3];
-	data[data.length]={sub_id:myID,
+
+	if (endFlag==1 && clickBCount){
+		document.getElementById("exp_next").disabled=false;
+	}
+
+	document.getElementById("arrow_line_A").style.background=connect_color[myClick[clickACount % 3]];
+	document.getElementById("arrow_point_A").style.borderLeftColor=connect_color[myClick[clickACount % 3]];
+	document.getElementById("arrow_hint_A").innerHTML=connect_name[myClick[clickACount % 3]];
+	document.getElementById("arrow_hint_A").style.color=connect_hint_color[myClick[clickACount % 3]];
+	
+	if (trainFlag){
+		if (clickACount>=6 & clickBCount>=6){
+			document.getElementById("exp_next").disabled=false;
+		}
+		return;
+	}
+
+	data[data.length]={
 		position:myPosition,
 		trial_order:trialNumber,
 		trial_type:trial_sqc.type,
@@ -248,20 +287,39 @@ function ClickA(){
 		B_pro:trial_sqc.b};
 	data[data.length-1].begintime=beginTime;
 	data[data.length-1].unixtime=Date.now();
-	data[data.length-1].A_state=connect_state[clickACount % 3];
-	data[data.length-1].B_state=connect_state[clickBCount % 3];
+	data[data.length-1].A_state=connect_state[myClick[clickACount % 3]];
+	if (clickBCount){
+		data[data.length-1].B_state=connect_state[myClick[clickBCount % 3]];
+	}else{
+		data[data.length-1].B_state="T";
+	}
 	data[data.length-1].data_type="online";
-	data[data.length-1].acc=Number(connect_state[clickACount % 3]==trial_sqc.a && connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_a=Number(connect_state[clickACount % 3]==trial_sqc.a);
-	data[data.length-1].acc_b=Number(connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_connection=Number(connect_state[clickACount % 3]==trial_sqc.a)+Number(connect_state[clickBCount % 3]==trial_sqc.b);
+	data[data.length-1].acc=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a && connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_a=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a);
+	data[data.length-1].acc_b=Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_connection=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a)+Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
 }
 
 function ClickB(){
 	clickBCount=clickBCount+1;
-	document.getElementById("arrow_line_B").style.background=connect_color[clickBCount % 3];
-	document.getElementById("arrow_point_B").style.borderLeftColor=connect_color[clickBCount % 3];
-	data[data.length]={sub_id:myID,
+
+	if (endFlag==1 && clickACount){
+		document.getElementById("exp_next").disabled=false;
+	}
+
+	document.getElementById("arrow_line_B").style.background=connect_color[myClick[clickBCount % 3]];
+	document.getElementById("arrow_point_B").style.borderLeftColor=connect_color[myClick[clickBCount % 3]];
+	document.getElementById("arrow_hint_B").innerHTML=connect_name[myClick[clickBCount % 3]];
+	document.getElementById("arrow_hint_B").style.color=connect_hint_color[myClick[clickBCount % 3]];
+	
+	if (trainFlag){
+		if (clickACount>=6 & clickBCount>=6){
+			document.getElementById("exp_next").disabled=false;
+		}
+		return;
+	}
+
+	data[data.length]={
 		position:myPosition,
 		trial_order:trialNumber,
 		trial_type:trial_sqc.type,
@@ -270,19 +328,34 @@ function ClickB(){
 		B_pro:trial_sqc.b};
 	data[data.length-1].begintime=beginTime;
 	data[data.length-1].unixtime=Date.now();
-	data[data.length-1].A_state=connect_state[clickACount % 3];
-	data[data.length-1].B_state=connect_state[clickBCount % 3];
+	if (clickACount){
+		data[data.length-1].A_state=connect_state[myClick[clickACount % 3]];
+	}else{
+		data[data.length-1].A_state="T";
+	}
+	data[data.length-1].B_state=connect_state[myClick[clickBCount % 3]];
 	data[data.length-1].data_type="online";
-	data[data.length-1].acc=Number(connect_state[clickACount % 3]==trial_sqc.a && connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_a=Number(connect_state[clickACount % 3]==trial_sqc.a);
-	data[data.length-1].acc_b=Number(connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_connection=Number(connect_state[clickACount % 3]==trial_sqc.a)+Number(connect_state[clickBCount % 3]==trial_sqc.b);
+	data[data.length-1].acc=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a && connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_a=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a);
+	data[data.length-1].acc_b=Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_connection=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a)+Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
 
 }
 
 function TrialNext(){
-	//document.getElementById('frame_line_A').style.pointerEvents = 'none';
-	//document.getElementById('frame_line_B').style.pointerEvents = 'none';
+	document.getElementById('frame_line_A').style.pointerEvents = 'none';
+	document.getElementById('frame_line_B').style.pointerEvents = 'none';
+
+	if (trainFlag){
+		ShowNextTrial();
+		document.getElementById("exp_start").disabled=false;
+		document.getElementById("frame_progress").style.display="block";
+		document.getElementById("frame_reminder").style.display="block";
+		document.getElementById("click_training").style.display="none";
+		trainFlag=0;
+		return;
+	}
+
 	if (trialNumber==0){
 		if (pracFlag==1){
 			PracFeedback();
@@ -297,17 +370,17 @@ function TrialNext(){
 
 function PracFeedback(){
 	if (myPosition){
-		document.getElementById("hint").innerHTML="The correct answer of this device is <b>Generative (above)</b> and <b>Non-causal (below)</b>, click <b>Next</b> to move onto the formal experiment.There will be no feedback in the formal experiment." 
+		document.getElementById("hint").innerHTML="The correct answer of this device is <b>Generative (above)</b> and <b>Non-causal (below)</b>. Click <b>Next</b> to move onto the formal experiment when you are ready.<b>There will be no feedback in the formal experiment</b>." 
 	}else{
-		document.getElementById("hint").innerHTML="The correct answer of this device is <b>Non-causal (above)</b> and <b>Generative (below)</b>, click <b>Next</b> to move onto the formal experiment.There will be no feedback in the formal experiment." 
+		document.getElementById("hint").innerHTML="The correct answer of this device is <b>Non-causal (above)</b> and <b>Generative (below)</b>. Click <b>Next</b> to move onto the formal experiment when you are ready.<b>There will be no feedback in the formal experiment</b>." 
 	}
 
-	if (clickACount % 3 ==0){
+	if (myClick[clickACount % 3] ==0){
 		document.getElementById("frame_line_A").style.background="#9ee89f";
 	}else{
 		document.getElementById("frame_line_A").style.background="#e89e9e";
 	}
-	if (clickBCount % 3 ==1){
+	if (myClick[clickBCount % 3] ==1){
 		document.getElementById("frame_line_B").style.background="#9ee89f";
 	}else{
 		document.getElementById("frame_line_B").style.background="#e89e9e";
@@ -316,7 +389,7 @@ function PracFeedback(){
 }
 
 function DataRecord(){
-	data[data.length]={sub_id:myID,
+	data[data.length]={
 		position:myPosition,
 		trial_order:trialNumber,
 		trial_type:trial_sqc.type,
@@ -325,35 +398,43 @@ function DataRecord(){
 		B_pro:trial_sqc.b};
 	data[data.length-1].begintime=beginTime;
 	data[data.length-1].unixtime=Date.now();
-	data[data.length-1].A_state=connect_state[clickACount % 3];
-	data[data.length-1].B_state=connect_state[clickBCount % 3];
+	data[data.length-1].A_state=connect_state[myClick[clickACount % 3]];
+	data[data.length-1].B_state=connect_state[myClick[clickBCount % 3]];
 	data[data.length-1].data_type="final";
-	data[data.length-1].acc=Number(connect_state[clickACount % 3]==trial_sqc.a && connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_a=Number(connect_state[clickACount % 3]==trial_sqc.a);
-	data[data.length-1].acc_b=Number(connect_state[clickBCount % 3]==trial_sqc.b);
-	data[data.length-1].acc_connection=Number(connect_state[clickACount % 3]==trial_sqc.a)+Number(connect_state[clickBCount % 3]==trial_sqc.b);
+	data[data.length-1].acc=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a && connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_a=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a);
+	data[data.length-1].acc_b=Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
+	data[data.length-1].acc_connection=Number(connect_state[myClick[clickACount % 3]]==trial_sqc.a)+Number(connect_state[myClick[clickBCount % 3]]==trial_sqc.b);
 	ShowNextTrial();
-	//console.log(data);
 }
 
 function ShowNextTrial(){
-	if (trialNumber>=sti_list.length+1){//debug:>=sti_list.length+1
+	if (trialNumber>=sti_list.length){//debug:>=sti_list.length+1
 		document.getElementById("experiment").style.display="none";
-		// ShowSurvey();
+		ShowSurvey();
 		return;
 	}
 	clickACount=0;
 	clickBCount=0;
+	endFlag=0;
+	document.getElementById("arrow_hint_A").innerHTML="";
+	document.getElementById("arrow_hint_B").innerHTML="";
+	document.getElementById("arrow_hint_A").style.color="black";
+	document.getElementById("arrow_hint_B").style.color="black";
 	document.getElementById("arrow_line_A").style.background=connect_color[0];
 	document.getElementById("arrow_point_A").style.borderLeftColor=connect_color[0];
 	document.getElementById("arrow_line_B").style.background=connect_color[0];
 	document.getElementById("arrow_point_B").style.borderLeftColor=connect_color[0];
-	trialNumber=trialNumber+1;
-	document.getElementById("progress_indicator").style.width=Number(45*(trialNumber+1))+"px";
-	document.getElementById("trial_title").innerHTML="Device "+trialNumber+" of 19";
-	document.getElementById("hint").innerHTML="click <b>Start</b> to watch the clip for this device, when you are ready,"
 	document.getElementById("exp_next").disabled=true;
 	document.getElementById("exp_start").disabled=false;
+	document.getElementById("hint").innerHTML="click <b>Start</b> to watch the clip for this device, when you are ready:)"
+	trialNumber=trialNumber+1;
+	document.getElementById("progress_indicator").style.width=Number(45*(trialNumber))+"px";
+	if (trialNumber==0){
+		document.getElementById("trial_title").innerHTML="Device "+trialNumber+" of 18 (practice)";
+	}else{
+		document.getElementById("trial_title").innerHTML="Device "+trialNumber+" of 18";
+	}	
 }
 
 
@@ -364,15 +445,18 @@ function ShowSurvey(){
 }
 
 function SurveyClick(){
-	if (document.getElementById("gender_unselected").selected|document.getElementById("engaging_unselected").selected|document.getElementById("difficult_unselected").selected){
+	if (document.getElementById("gender_unselected").selected|document.getElementById("engaging_unselected").selected|document.getElementById("difficult_unselected").selected|document.getElementById("age").value==""){
 	}else{
 		document.getElementById("survey_submit").disabled=false;
 	}
 }
 
 function SaveData(){
-	var subject=myID;
+	myABI=Math.random().toString(36).substring(2, 4)+["a","6"][Number(Math.random()>0.5)]+Math.random().toString(36).substring(2, 6)+["p","m"][Number(Math.random()>0.5)]+Math.random().toString(36).substring(2, 3);
+	var subject=myABI;
 	var position=myPosition;
+	var clickpattern=JSON.stringify(connect_state[myClick[1]]+connect_state[myClick[2]]+connect_state[myClick[0]]);
+	var exp_id="bea";
 	var age=document.getElementById("age").value;
 	var feedback=document.getElementById("text_feedback").value;
 
@@ -413,6 +497,8 @@ function SaveData(){
 		type:'POST',
 		data:{subject:subject,
 			position:position,
+			clickpattern:clickpattern,
+			exp_id:exp_id,
 			age:age,
 			feedback:feedback,
 			gender:gender,
@@ -443,35 +529,67 @@ function SaveData(){
 }
 
 
-function FinishExp(){
-	document.getElementById("survey").style.display="none";
-	document.getElementById("experiment_finished").style.display="block";
-	document.getElementById("give_ID").innerHTML="Your reference code is:  "+myID;
-	document.getElementById("finish_info").innerHTML="Please write your reference code in Mturk and then close this window. Thanks so much!"
+// function FinishExp(){
+// 	document.getElementById("survey").style.display="none";
+// 	document.getElementById("experiment_finished").style.display="block";
+// 	document.getElementById("give_ID").innerHTML="Your reference code is:  "+myABI;
+// 	document.getElementById("finish_info").innerHTML="Please write your reference code in Mturk and then close this window. Thanks so much!"
+// }
+
+// function FinishError(){
+// 	document.getElementById("give_ID").innerHTML="Your reference code is:  "+myABI;
+// 	document.getElementById("finish_info").innerHTML="<span style='color: red'>Error: the data might not upload to database successfully. Please contact the experimenter.</span>"
+// }
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
 }
 
-function FinishError(){
-	document.getElementById("give_ID").innerHTML="Your reference code is:  "+myID;
-	document.getElementById("finish_info").innerHTML="<span style='color: red'>Error: the data might not upload to database successfully. Please contact the experimenter.</span>"
-}
 
-function randperm(maxValue){
-	// first generate number sequence
-	var permArray = new Array(maxValue);
-	for(var i = 0; i < maxValue; i++){
-	   permArray[i] = i;
-	}
-	// draw out of the number sequence
-	for (var i = (maxValue - 1); i >= 0; --i){
-	   var randPos = Math.floor(i * Math.random());
-	   var tmpStore = permArray[i];
-	   permArray[i] = permArray[randPos];
-	   permArray[randPos] = tmpStore;
-	}
-	return permArray;
-}
+// function ipcheck () {
+// 	console.log('test');
 
-ShowExp()
+// 	jQuery.ajax({
+// 		url: 'static/php/check_id.php',
+// 		type:'POST',
+// 		success:function(data)
+// 		{
+// 			if (data==1)
+// 			{
+// 				Oops();
+// 			} else if (data==0)
+// 			{
+// 			} else {
+// 				alert('answer was not 1 or 0!');
+// 			}
+			
+// 		},
+// 		error:function()
+// 		{
+// 			alert('failed to connect to ip')
+// 		}
+// 		//var result_str:String = event.target.data.toString();
+//  		//id_check = Number(result_str);		
+//  		//trace(id_check);
+
+// 	})
+// }
+
+// function Oops(){
+// 	document.getElementById('frame_consent').innerHTML="Unfortunately, you cannot do this experiment because you (or someone in your household) have participated in this experiment or a similar experiment before. Please close the window. Thank you!"
+// 	document.getElementById('i_agree').style.display="none";
+// 	document.getElementById('title_consent').innerHTML="Oops:("
+// }
+
+
+
 // For offline running
 // download(JSON.stringify(data), 'data.txt', '"text/csv"');
 // function download(content, fileName, contentType) {
