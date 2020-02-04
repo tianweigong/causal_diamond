@@ -744,4 +744,4 @@ for (i in 1:length(filelist)){
   df.model=rbind(df.model,model_result)
 }
 
-save(df.model,file="df.model.Rda")
+# save(df.model,file="df.model.Rda")
