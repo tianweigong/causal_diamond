@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="static/css/styles.css">
+	<script src="static/lib/jquery.min.js"></script>
+	<script src="static/js/myseed.js"></script>
+	<title>Experiment</title>
+</head>
+<body>
+	<div id="consent">
+		<h1 id="title_consent"> University of Edinburgh, Psychology</h1>
+		<div class="frame_big" id="frame_consent">
+			<p>
+			<b>Nature of the study:</b> You are invited to participate in a study which involves watching clips carefully and answering questions about them. Once you finish, we may have also some questions about your experience (e.g., age, gender). Your responses will be recorded. Your session should last for up to 20 minutes. You will be given full instructions shortly.
+			</p>
+            <p>
+            <b>Compensation:</b> You will be paid $1 for your participation in this study (And a bonus between $0-1.08. People got $0.77 on average).
+    		</p>
+    		<p>
+    		<b>Risks and benefits:</b> There are no known risks to participation in this study. Other than the payment mentioned, there no tangible benefits to you, however you will be contributing to our knowledge about reasoning.  
+    		</p>
+    		<p>
+    		<b>Confidentiality and use of data:</b> All the information we collect during the course of the research will be processed in accordance with Data Protection Law. In order to safeguard your privacy, we will never share personal information (like names or dates of birth) with anyone outside the research team. Your data will be referred to by a unique participant number rather than by name. Please note that we will temporarily collect your worker ID to prevent repeat participation, however we will never share this information with anyone outside the research team.The anonymised data collected during this study will be used for research purposes.
+    		</p>
+    		<p>
+    		<b>What are my data protection rights:</b> The University of Edinburgh is a Data Controller for the information you provide.  You have the right to access information held about you. Your right of access can be exercised in accordance Data Protection Law. You also have other rights including rights of correction, erasure and objection.  For more details, including the right to lodge a complaint with the Information Commissioner’s Office, please visit www.ico.org.uk.  Questions, comments and requests about your personal data can also be sent to the University Data Protection Officer at dpo@ed.ac.uk.
+    		</p>
+    		<p>
+    		<b>Voluntary participation and right to withdraw:</b> Your participation is voluntary, and you may withdraw from the study at any time and for any reason. If you withdraw from the study during or after data gathering, we will delete your data and there is no penalty or loss of benefits to which you are otherwise entitled.
+    		</p>
+    		<p>
+    		<b>If you have any questions about what you’ve just read, please feel free to ask, or contact us later. You can contact us by email at bramleylab@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your rights as a participant, they can be contacted at +44 0131 650 4020 or ppls.ethics@ed.ac.uk.</b>
+    		</p>
+    		<p>
+    		By electing the "I Agree" button below, you consent to the following:
+    		<ul>
+    			<li>I agree to participate in this study.</li>
+    			<li>I confirm that I have read and understood how my data will be stored and used.</li>
+    			<li>I understand that I have the right to terminate this session at any point. If I choose to withdraw after completing the study, my data will be deleted at that time.</li>
+    		</ul>
+    		</p>
+
+
+		</div>
+		<div class="button_panel">
+			<button type="button" class="next" id = "i_agree" onclick="ConsentClick()"> ✔ I Agree</button>
+		</div>
+	</div>
+
+	<div id="instruction">
+		<h1> Instructions</h1>
+		<div id="ins_pre">
+			<div class="frame_big">
+				<h1>Thank you for participating in this study!</h1>
+				<p>Please read the instructions very carefully!</p> 
+				<p><b>You will have to pass a test on your understanding before you can start the experiment. </b></p>
+				<p style="color: red">Please minimize the chances of possible distractions (please switch off messengers, email, music,...)! </p>
+				<p>Please make this window as large as possible (full screen best).Please do not refresh this page during the experiment.</p>
+				<p>Click <b>Next</b> to move onto the instructions.</p>
+			</div>
+		</div>
+		<div id="ins1">
+			<div class="frame_big">
+				<p>In this task, you will watch video clips and then try to figure out the connections between the components of several causal devices. The causal devices look like this:</p>
+				<img id="figure_1" src="static/images/ins1.png">
+				<p>Each device has two <b>control components</b> (buttons on the left) and one <b>target component</b> (diamond shaped on the right). </p>
+
+	            <p>Click <b>Next</b> to move onto the next instructions.</p>
+			</div>
+		</div>
+		<div id="ins_baserate">
+			<div class="frame_big">
+
+				<p><b>The target component</b> activates by itself at completely random times, about 2-7 times in 20 seconds. That means the last time that it activated doesn’t tell you anything about when it will next activate (you can imagine that someone sometimes activates the target component directly but you cannot anticipate when this will happen).</p>
+
+
+				<div class="frame_training">
+				<img class="figure_training" src="static/images/baserate.png">
+				</div>
+			</div>
+		</div>
+		<div id="ins_baserate_over">
+			<div class="frame_big">
+				<p>However, <b>activations of the control components</b> might affect the target components' activations.</p>
+				<p>There are three ways that a control component might influence the effect component. A control component might always <b>generate</b> an additional activation of the target. Or, it might always <b>prevent</b> the next activation(s) of the target. The third possibility is that it always has <b>no effect</b> on the target. For each device, your task will be to figure out what kind of influence each control component has on the target component.</p>
+
+				<p>Click <b>Next</b> to move onto the next instructions.</p>
+			</div>
+		</div>
+		<div id="ins_type_generative">
+			<div class="frame_big">
+	            	<p><b>Generative connection: </b>Generative components will produce an extra activation of the target component, around 1.5 seconds.</p>
+
+	            	<p>Note that no activations will be hidden by another in the videos you are about to watch in this experiment. That means you don’t need to worry that two activations happened too close together to distinguish from one another.</p>
+	            <div class="frame_training">
+				<img class="figure_training" src="static/images/generate.png">
+				</div>
+	    	</div>
+		</div>
+		<div id="ins_type_preventative">
+			<div class="frame_big">
+					<p><b>Preventative connection: </b>Preventative components will block all activations of the diamond for around 3 seconds, no matter whether those activations were caused by a generative connection or happened by themsleves.</p>
+				<div class="frame_training">
+				<img class="figure_training" src="static/images/prevent.png">
+				</div>
+			</div>
+		</div>
+		<div id="ins_type_noncausal">
+			<div class="frame_big">
+					<p><b>Non-causal connection: </b>Unconnected control components have no impact on the target component.</p>
+	            <div class="frame_training">
+				<img class="figure_training" src="static/images/noncausal.png">
+				</div>
+			</div>
+		</div>
+		<div id="bonus_reminder">
+			<div class="frame_big">
+				<p> For each device, you will get to <b>watch</b> a video clip in which someone clicks on each control component several times.</p>
+				<p>Your task is to identify the relationships between control components and the target component. Each could be generative, preventative, or non-causal (no relationship).</p>
+				<p>The total duration of a clip is <b>20 seconds</b>. At the beginning of a clip, the target component will self-activate. <b>After 20 seconds it is not possible to observe further activations of any component even though there may be more activations about to occur</b>.</p>
+				<p>Each clip <b>can only be played once</b>. So please focus while watching the clip and try to understand the relationships between control components and target component. If you feel tired during the experiment, you can take a break between trials.</p>
+				<p>You will get a <b>bonus</b> of 3 cents for each correctly identified connection per device. This means that the maximum payment for completing the 18 devices is $1.08 (plus your basic payment of $1.00)</p>
+
+			</div>
+		</div>
+		<div id="check">
+			<div class="frame_big">
+				<p> Comprehension check: To make sure you understand the instructions, now please indicate for each statement whether it is correct or false.</p>
+				<form>
+					<p>"Your job is to work out what kind connection there is between each of the two control components and the target component in each device."</p>
+					<input type="radio" name="check1" value="yes" id="check1_yes" required="required" onclick="CheckClick()"><label for="check1_yes">Correct</label>
+					<input type="radio" name="check1" value="no" id="check1_no" required="required" onclick="CheckClick()"><label for="check1_no">False</label>
+					<p>"Each clip last 20 seconds and you can watch each of them as many times as you want."</p>
+					<input type="radio" name="check2" value="yes" id="check2_yes" required="required" onclick="CheckClick()"><label for="check2_yes">Correct</label>
+					<input type="radio" name="check2" value="no" id="check2_no" required="required" onclick="CheckClick()"><label for="check2_no">False</label>
+					<p>"The target component occurs 2-7 times per clip on average but the gap between any two occurrences is completely random."</p>
+					<input type="radio" name="check3" value="yes" id="check3_yes" required="required" onclick="CheckClick()"><label for="check3_yes">Correct</label>
+					<input type="radio" name="check3" value="no" id="check3_no" required="required" onclick="CheckClick()"><label for="check3_no">False</label>
+					<p>"If a preventative control component is activated, all activations of the target component will be blocked for around 3 seconds."</p>
+					<input type="radio" name="check4" value="yes" id="check4_yes" required="required" onclick="CheckClick()"><label for="check4_yes">Correct</label>
+					<input type="radio" name="check4" value="no" id="check4_no" required="required" onclick="CheckClick()"><label for="check4_no">False</label>
+					<p>"One activation of a generative control component will always produce an activation of the target component, after around 1.5 seconds, unless this is prevented by a  preventative control component activation."</p>
+					<input type="radio" name="check5" value="yes" id="check5_yes" required="required" onclick="CheckClick()"><label for="check5_yes">Correct</label>
+					<input type="radio" name="check5" value="no" id="check5_no" required="required" onclick="CheckClick()"><label for="check5_no">False</label>
+					<p>"You get a 3c bonus for each connection you identify correctly."</p>
+					<input type="radio" name="check6" value="yes" id="check6_yes" required="required" onclick="CheckClick()"><label for="check6_yes">Correct</label>
+					<input type="radio" name="check6" value="no" id="check6_no" required="required" onclick="CheckClick()"><label for="check6_no">False</label>
+					<p>"Attention check: please choose 'false' directly in this question."</p>
+					<input type="radio" name="check7" value="yes" id="check7_yes" required="required" onclick="CheckClick()"><label for="check7_yes">Correct</label>
+					<input type="radio" name="check7" value="no" id="check7_no" required="required" onclick="CheckClick()"><label for="check7_no">False</label>
+
+				</form>
+			</div>		
+		</div>
+		<div id="welldone">
+			<div class="frame_big">
+				<p>Well done, you got all the questions correct!</p>
+				<p>You are now ready to start the task.</p>
+
+				<p style="color: blue">We know this task might sound challenging, but just try your best! Don't forget you will get a bonus for <b>every</b> connection you correctly identify. We appreciate your effort &#x1f44d!</p>
+
+				<p>Please click <b>Next</b> to proceed.</p>
+        	</div>
+		</div>
+		<div id="checkagain">
+			<div class="frame_big">
+				<p>Unfortunately, you didn't answer all of the comprehension check questions correctly.</p>
+				<p>Please have another close look at the instructions and work out whether those statements are correct or false.</p>
+        	</div>
+		</div>
+		<div class ="button_panel">
+			<button type="button" id="ins_backward" onclick="InsPrevClick()"> ← Previous </button>
+			<button type="button" id="ins_forward" onclick="InsNextClick()">  Next → </button>
+		</div>
+	</div>
+
+	<div id="experiment">
+		<h1>Experiment</h1>
+		<div class="frame_big">
+			<div id="click_training">
+				<p>Before starting the experiment, let's learn how to provide your responses.</p>
+				<p>By clicking one or multiple times on the grey areas between the control components and the target component, you can cycle through different possible responses.</p>
+				<ul>
+					<li>You can mark what connections you think there are <span style="color: red"><b>during or after</b></span> each clip.</li>
+					<li>You can always change your answers up until you submit them. After submitting your answers, you will automatically be directed to the next trial.</li>
+				</ul>
+				<p>Please click each connection at least 6 times to get a sense of how it works.</p>
+			</div>
+			<div id="frame_progress">
+				<p id="progress_text">Progress:</p>
+				<div id="progress_container"><div id="progress_indicator"></div></div>
+			</div>
+			<div id="frame_reminder">
+				<ul id="reminder">
+				  <li>The target component self-activates randomly.</li>
+				  <li>Once a generative component is activated, it will produce an extra activation of the target component after around 1.5 seconds.</li>
+				  <li>If a preventative control component is activated, activations of the target component will be blocked for around 3 seconds.</li>
+		          <li>Each clip lasts <b>20 seconds</b>, beginning with a self-activation of the target component, and <b> can only be played once</b>.</li>
+		          <li>You can mark what kind of connections you think there are <b>during</b> or <b>after</b> the clip by clicking the grey connection area.</li>
+	        	</ul>
+	        	<p id="trial_title">Device 1 of 18</p>
+			</div>
+			<div id="frame_main">
+				<div class="frame_button" id="frame_button_A">
+		    		<div class="light_button" id="light_button_A"></div>
+		    		<div class="frame_hand" id="frame_hand_A"><img class="hand" src="static/images/hand.png"></div>
+	    		</div>
+				<div class="frame_button" id="frame_button_B">
+		    		<div class="light_button" id="light_button_B"></div>
+		    		<div class="frame_hand" id="frame_hand_B"><img class="hand" src="static/images/hand.png"></div>
+	    		</div>
+	    		<div class="light_bulb" id="frame_bulb"></div>
+	    		<div class="frame_line" id="frame_line_A" onclick="ClickA()">
+		    			<div class="arrow_line" id="arrow_line_A"><div class="arrow_hint noselect" id="arrow_hint_A"></div></div>
+		    			<div class="arrow_point" id="arrow_point_A"></div>
+	    		</div>
+	    		<div class="frame_line" id="frame_line_B" onclick="ClickB()">
+		    			<div class="arrow_line" id="arrow_line_B"><div class="arrow_hint noselect" id="arrow_hint_B"></div></div>
+		    			<div class="arrow_point" id="arrow_point_B"></div>
+	    		</div>
+			</div>
+			<p id="hint">&nbsp</p>
+		</div>
+		<div class ="button_panel">
+			<button type="button" id="exp_start" onclick="TrialStart()">Start</button>
+			<button type="button" id="exp_next" disabled ="true" onclick="TrialNext()">Next</button>
+		</div>
+	</div>
+	<div id="survey">
+		<h1>Thanks - you're almost done!</h1>
+		<div class="frame_big">
+			<p>Please use the interface below to provide us with some feedback about the task.</p>
+			<p><span style="color: red">*</span>Age</p>
+				<input type="number" name="age" id="age" oninput="SurveyClick()">
+			<p><span style="color: red">*</span>Gender</p>
+				<select name="gender" id="gender" onchange="SurveyClick()">
+					<option id="gender_unselected" value="--" SELECTED>
+	                <option value="female">Female</option>
+	                <option value="male">Male</option>
+	                <option value="other">Other</option>
+	                <option value="noresponse">I'd prefer not to respond</option>
+	            </select>
+            <p><span style="color: red">*</span>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the learning task:</p>
+            	<select name="engaging" id="engaging" onchange="SurveyClick()">
+	                <option id="engaging_unselected" value="--" SELECTED>
+                    <option value="10">10 - Very engaging</option>
+                    <option value="9">9</option>
+                    <option value="8">8</option>
+                    <option value="7">7</option>
+                    <option value="6">6</option>
+                    <option value="5">5 - Moderately</option>
+                    <option value="4">4</option>
+                    <option value="3">3</option>
+                    <option value="2">2</option>
+                    <option value="1">1</option>
+                    <option value="0">0 - Not engaged</option>
+	            </select>
+            <p><span style="color: red">*</span>On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the learning task:</p>
+            	<select name="difficult" id="difficult" onchange="SurveyClick()">
+                    <option id="difficult_unselected" value="--" SELECTED>
+                    <option value="10">10 - Very difficult</option>
+                    <option value="9">9</option>
+                    <option value="8">8</option>
+                    <option value="7">7</option>
+                    <option value="6">6</option>
+                    <option value="5">5 - Moderately difficult</option>
+                    <option value="4">4</option>
+                    <option value="3">3</option>
+                    <option value="2">2</option>
+                    <option value="1">1</option>
+                    <option value="0">0 - Not difficult at all</option>
+	            </select>
+	        <p><span style="color: red">*</span>On a scale of 1-10, please choose 3 directly in this question (attention check):</p>
+            	<select name="acheck" id="acheck" onchange="SurveyClick()">
+                    <option id="acheck_unselected" value="--" SELECTED>
+                    <option value="10">10</option>
+                    <option value="9">9</option>
+                    <option value="8">8</option>
+                    <option value="7">7</option>
+                    <option value="6">6</option>
+                    <option value="5">5</option>
+                    <option value="4">4</option>
+                    <option value="3">3</option>
+                    <option value="2">2</option>
+                    <option value="1">1</option>
+                    <option value="0">0</option>
+	            </select>
+            <p>(Optional) Feedback: Please write down your feelings and comments on this experiment.</p>
+            <textarea id='text_feedback' rows="4" cols="100"></textarea>
+		</div>
+		<button type="button" id="survey_submit" onclick="SaveData()">Submit</button>
+	</div>
+	<div id="experiment_finished">
+		<h1>Thank you for participating!</h1>
+		<div class="frame_big">
+			<p>The experiment finished.</p>
+			<h1 id="give_ID"></h1>
+			<p id="finish_info"></p>
+		</div>
+	</div>
+</body>
+	<script src="static/js/script.js"></script>
+</html>

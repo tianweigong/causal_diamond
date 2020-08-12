@@ -1,0 +1,5 @@
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/df.expect.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/df.expect_win3.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/df.expect.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/df.expect_win4.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/df.expect.Rda")

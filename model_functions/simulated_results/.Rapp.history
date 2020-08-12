@@ -1,0 +1,6 @@
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/3normative.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/1normative.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/136normative.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/80normative.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/199normative.Rda")
+load("/Users/tianweigong/Documents/GitHub/causal_diamond/causal_diamond/model_functions/simulated_results/1oneactual.Rda")
