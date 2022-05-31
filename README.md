@@ -20,11 +20,12 @@ material for a project of how people learn generative and preventative causal st
 
 #### modeling
 
-* `fun_fea.R`, `fun_nor.R`, `mdall_exp1.Rda`, `mdall_exp2.Rda`, `mdall_exp3.Rda`  -- normative and summary-statistic models, and their predictions for stimuli in Experiment 1-3
+* `fun_fea.R`, `fun_nor.R`  -- normative and summary-statistic models, and their predictions for stimuli in Experiment 1-3
 * `sim_fea.R`, `sim_fea`, `df.expect.Rda` -- generating simlations for summary-statistic models
 * `fun_softmax.R` -- softmax functions
-* `md_all_exp1.R`, `md_all_exp2.R`, `md_all_exp3.R`, `modelFit_exp1.Rda`, `modelFit_exp2.Rda`, `modelFit_exp3.Rda`-- aggregate model fits and their results
-* `softmax_exp1.R`, `softmax_exp2.R`, `softmax_exp3.R`, `softmax_exp1`, `softmax_exp2`, `softmax_exp3`. `softmax_report.R` -- individual fits and their results 
+* `md_all_exp1.R`, `md_all_exp2.R`, `md_all_exp3.R`, `modelFit_exp1.Rda`, `modelFit_exp2.Rda`, `modelFit_exp3.Rda`-- code to get the model predictions for each stimulus
+* `mdall_exp1.Rda`, `mdall_exp2.Rda`, `mdall_exp3.Rda` -- the model predictions for each stimulus
+* `softmax_exp1.R`, `softmax_exp2.R`, `softmax_exp3.R`, `softmax_exp1`, `softmax_exp2`, `softmax_exp3`, `softmax_report.R` -- code to fit participants' data on the aggragate and individual levels, and their results
 * `softmax_exp2_cond.R`, `softmax_exp3_cond.R`, `softmax_exp3_gt.R`, `softmax_exp3_ngt.R`  -- other fitting results seperate by conditions or with or without ground truths. 
 
 ## procedure
