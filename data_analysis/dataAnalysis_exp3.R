@@ -61,21 +61,4 @@ df.device=df.final%>%select("subject","acc_device","A_pro","B_pro","mycondition"
 vec.device=unique(df.device$trial_type)
 lapply(as.list(vec.device),function (x){t.test(subset(df.device,trial_type==x&mycondition=="regular")$acc,mu=0.11)})
 lapply(as.list(vec.device),function (x){t.test(subset(df.device,trial_type==x&mycondition=="irregular")$acc,mu=0.11)})
-#t.test(subset(df.device,trial_type=="PN"&mycondition=="irregular")$acc,mu=0.11)
 
-
-#+ condition comparison -------------------
-#' # condition comparison
-
-df.lme.link=df.final%>%select("subject","acc_a","A_pro","mycondition","seed")%>%mutate(acc=acc_a,pro=A_pro,acc_a=NULL,A_pro=NULL) %>% 
-  rbind(df.final%>%select("subject","acc_b","B_pro","mycondition","seed")%>%mutate(acc=acc_b,pro=B_pro,acc_b=NULL,B_pro=NULL))
-
-#link
-m=glmer(acc ~ mycondition + (1|seed) + (1|pro) + (1|subject), data = df.lme.link, family=binomial)
-m%>% summary()
-confint.merMod(m,method = "Wald")
-
-#structure
-m=glmer(acc_device ~ mycondition + (1|seed) + (1|trial_type) + (1|subject), data = df.final, family=binomial)
-m%>% summary()
-confint.merMod(m,method = "Wald")

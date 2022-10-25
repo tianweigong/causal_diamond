@@ -1,6 +1,8 @@
 ---
 title: "dataAnalysis_comb"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -86,7 +88,7 @@ for (k in 1:nrow(df.ord)){
 df.comb=df.comb%>% merge(df.ord,by="uni_seed")
 ```
 
-#add model prediction
+# add model prediction
 ```{r}
 mySim<-function(pr,amp=10){
   md=data.frame()
@@ -137,19 +139,7 @@ for (k in 1:length(md.sim)){
 # load("md.sim.Rda")
 ```
 
-#model accuracy
-```{r}
-md.nor$acc_mean=(md.nor$A_state==md.nor$A_pro)*0.5+(md.nor$B_state==md.nor$B_pro)*0.5
-summarySE(md.nor,measurevar = "acc_mean",groupvars = c("exp","mycondition"))
-
-md.feaw$acc_mean=(md.feaw$A_state==md.feaw$A_pro)*0.5+(md.feaw$B_state==md.feaw$B_pro)*0.5
-summarySE(md.feaw,measurevar = "acc_mean",groupvars = c("exp","mycondition"))
-
-md.feai$acc_mean=(md.feai$A_state==md.feai$A_pro)*0.5+(md.feai$B_state==md.feai$B_pro)*0.5
-summarySE(md.feai,measurevar = "acc_mean",groupvars = c("exp","mycondition"))
-```
-
-#experiment difference
+# experiment difference
 ```{r}
 df=rbind(df1.link,df2.link)
 t.test(acc~exp,subset(df,mycondition=="regular"),var.equal = T)
@@ -162,7 +152,7 @@ t.test(acc_device~exp,subset(df,mycondition=="regular"),var.equal = T)
 t.test(acc_device~exp,subset(df,mycondition=="irregular"),var.equal = T)
 ```
 
-#link-level differences
+# link-level differences
 ```{r}
 myF1<-function(d,l){
   rec=nrow(subset(d,pro==l&state==l))/nrow(subset(d,pro==l))
@@ -171,7 +161,7 @@ myF1<-function(d,l){
 }
 ```
 
-##link-types
+## link-types
 ```{r}
 df.link=df.comb %>% mutate(pro=A_pro,state=A_state)%>%
   rbind(df.comb %>% mutate(pro=B_pro,state=B_state))
@@ -243,28 +233,10 @@ summarySE(df.f1,measurevar = "f1",groupvars = c("mycondition","state"),na.rm=T)%
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         legend.margin=margin(-5,0,0,0))
 
-ggsave(file="f_exp_f1.pdf",width = 6.5,height = 5)
-
-# summarySE(df.f1,measurevar = "rec",groupvars = c("mycondition","state"),na.rm=T)%>% 
-#   ggplot(aes(x=state,y=rec))+
-#   facet_wrap(~mycondition)+
-#   geom_bar(stat="identity",color="black",fill="white",position=position_dodge(.9))+
-#   geom_errorbar(aes(ymin = rec-ci,ymax = rec+ci),width=0,size=0.8,position=position_dodge(.9))+
-#   geom_line(data=df.mdf1,aes(x=state,y=rec,color=md,group=md))+
-#   scale_color_manual(values=scales::alpha(c("#7cae00","#00bfc4","#c77cff"),.6))+
-#   theme_bw()
-# 
-# summarySE(df.f1,measurevar = "pre",groupvars = c("mycondition","state"),na.rm=T)%>% 
-#   ggplot(aes(x=state,y=pre))+
-#   facet_wrap(~mycondition)+
-#   geom_bar(stat="identity",color="black",fill="white",position=position_dodge(.9))+
-#   geom_errorbar(aes(ymin = pre-ci,ymax = pre+ci),width=0,size=0.8,position=position_dodge(.9))+
-#   geom_line(data=df.mdf1,aes(x=state,y=pre,color=md,group=md),size=.7)+
-#   scale_color_manual(values=scales::alpha(c("#7cae00","#00bfc4","#c77cff"),.6))+
-#   theme_bw()
+# ggsave(file="f_exp_f1.pdf",width = 6.5,height = 5)
 ```
 
-##paired
+## paired
 ```{r}
 df.pairACC=df.comb %>% mutate(pro=A_pro,paired=B_pro,acc=acc_a)%>%
   rbind(df.comb %>% mutate(pro=B_pro,paired=A_pro,acc=acc_b))
@@ -275,8 +247,6 @@ df.pairACC.wide %>%
   MANOVA(dvs="P1:P3", dvs.pattern="P(.)",between=c("mycondition"),within=c("P")) %>%
   EMMEANS("P",by="mycondition")
 
-# lmer(acc~paired+(1|subject)+(1|uni_seed),subset(df.pairACC,mycondition=="regular"))%>%summary()
-# lmer(acc~paired+(1|subject)+(1|uni_seed),subset(df.pairACC,mycondition=="irregular"))%>%summary()
 ```
 
 ```{r}
@@ -326,114 +296,98 @@ summarySE(pic,measurevar = "acc",groupvars = c("paired","mycondition"))%>%
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
     legend.margin=margin(-5,0,0,0))
 
-ggsave(file="f_exp_paired.pdf",width = 6.5,height = 5)
+# ggsave(file="f_exp_paired.pdf",width = 6.5,height = 5)
 ```
 
-##link f1-pair
+# error patterns
+## confusion matrix
 ```{r}
-df.link=df.comb %>% mutate(pro=A_pro,state=A_state,paired=B_pro)%>%
-  rbind(df.comb %>% mutate(pro=B_pro,state=B_state,paired=A_pro))
-
-df.pairF1=data.frame() 
-for (k in unique(df.comb$uni_seed)){
-  df=data.frame(uni_seed=k,paired_pro=rep(c("G","N","P"),each=3),state=rep(c("G","N","P"),3),f1=NA)
-  df=rbind(mutate(df,mycondition="regular"),mutate(df,mycondition="irregular"))%>%
-    mutate(mycondition=factor(mycondition,levels = c("regular","irregular")))
+myMatPlot<-function(d){
+  d1=d %>%
+      group_by(mycondition,pro,state)%>%
+      dplyr::summarise(n=n())
+  d1= expand.grid(state=c("G","N","P"),
+                  pro=c("G","N","P"),
+                  mycondition=c("regular","irregular"),
+                  fi=0
+                  ) %>% merge(d1,by=c("mycondition","pro","state"),all = T)
   
-  for (m in 1:nrow(df)){
-    d=df.link%>% subset(uni_seed==k & paired==df$paired_pro[m] & mycondition==df$mycondition[m])
-    re=myF1(d,df$state[m])
-    df$rec[m]=re[[1]];df$pre[m]=re[[2]];df$f1[m]=re[[3]]
-  }
-  df.pairF1=rbind(df.pairF1,df)
-}
-
-df.pairF1.wide=df.pairF1 %>% reshape2:: dcast(uni_seed+mycondition~ state+paired_pro,value.var = "f1")%>% rename(replace = c("G_G" = "S1P1","G_N" = "S1P2","G_P" ="S1P3","N_G" = "S2P1","N_N" = "S2P2","N_P" ="S2P3","P_G" = "S3P1","P_N" = "S3P2","P_P" ="S3P3"))
-
-df.pairF1.wide %>%
-  subset(mycondition=="regular")%>%
-  MANOVA(dvs="S1P1:S3P3", dvs.pattern="S(.)P(.)",within=c("S","P"))
-
-df.pairF1.wide %>%
-  subset(mycondition=="irregular")%>%
-  MANOVA(dvs="S1P1:S3P3", dvs.pattern="S(.)P(.)",within=c("S","P"))
-```
-
-```{r eval = FALSE, echo = FALSE}
-df.pairMdf1=data.frame()
-for (k in 1:length(md.sim)){
-    df=data.frame(md=names(md.sim)[k],paired_pro=rep(c("G","N","P"),each=3),state=rep(c("G","N","P"),3),f1=NA)
-    df=rbind(mutate(df,mycondition="regular"),mutate(df,mycondition="irregular"))%>%
-    mutate(mycondition=factor(mycondition,levels = c("regular","irregular")))
-
-  for (m in 1:nrow(df)){
-    d1=md.sim[[k]] %>% subset(mycondition==as.character(df$mycondition[m]))
-    d=d1%>%mutate(pro=A_pro,state=A_state,paired=B_pro)%>%
-      rbind(d1%>%mutate(pro=B_pro,state=B_state,paired=A_pro)) %>%
-      subset(paired==df$paired_pro[m])
-    re=myF1(d,df$state[m])
-    df$rec[m]=re[[1]];df$pre[m]=re[[2]];df$f1[m]=re[[3]]
-  }
-  df.pairMdf1=rbind(df.pairMdf1,df)
-}
-df.pairMdf1=df.pairMdf1 %>% mutate(md=factor(md,levels=c("nor","feai","feaw"),labels=c("Normative","SS (fixed-window)","SS (intervention-based)")))
-```
-
-```{r}
-summarySE(df.pairF1,measurevar = "f1",groupvars = c("mycondition","state","paired_pro"),na.rm=T)%>% 
-  ggplot(aes(x=state,y=f1,group=paired_pro,fill=paired_pro))+
-  geom_bar(stat="identity",color="black",fill="white",position=position_dodge(.9))+
-  geom_errorbar(aes(ymin = f1-ci,ymax = f1+ci),width=0,size=0.8,position=position_dodge(.9),color="black")+
-  # geom_point(data=df.pairMdf1,aes(x=state,y=f1,color=md,group=paired_pro),position=position_dodge(.9))+
-  facet_wrap(~mycondition,labeller=as_labeller(c(regular="Regular",irregular="Irregular")))+
-  # scale_color_manual(values=scales::alpha(c("#7cae00","#00bfc4","#c77cff"),.6))+
-  xlab("Ground truth")+
-  scale_x_discrete(labels=c("Generative","Non-causal","Preventative"))+
-  ylab("F1-score")+
-  # scale_fill_manual("Paired with",values=c("#66A61E","#666666","#E6AB02"),labels=c("Generative","Non-causal","Preventative"))+
-  theme_bw()+  
-  theme(text = element_text(size=12),
-  axis.text=element_text(colour="black"),
-  strip.text.x = element_text(size = 12),
-  panel.grid = element_blank(),
-  strip.background =element_rect(fill="white",color="white"),
-  legend.position = "bottom")+
-  theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-        axis.text.x = element_text(margin = margin(t = 17, r = 0, b = 0, l = 0)),
-        axis.ticks.x = element_blank(),
-    legend.margin=margin(-5,0,0,0))
-
-ggsave(file="exp_pairedF1.pdf",width = 8,height = 3.8)
-
-```
-###pair-frequency (w/o gd)
-```{r}
-myPairFrePlot<-function(df){
-  df%>% ggplot(aes(x=paired,fill=state))+
-  facet_wrap(~mycondition,labeller=as_labeller(c(regular="Regular",irregular="Irregular")))+
-  geom_bar(position = "fill",color="black",size=0.2,width=0.5)+
-  # geom_hline(yintercept = c(1/3,2/3),linetype = 'dotted')+
-    scale_fill_manual("Choice",values=c("#66A61E","#666666","#E6AB02"),labels=c("Generative","Non-causal","Preventative"))+
+  d1$n=pmax(d1$n,d1$fi,na.rm=T)
+  
+  d2=d1%>% group_by(mycondition,pro)%>%
+      dplyr::summarise(sum=sum(n))
+  
+  d1$prob = d1$n/rep(d2$sum,each=3)
+  d1$mylabel=paste( round(d1$prob,2)*100,"%",sep="")
+  d1$label_col=ifelse(d1$prob>0.4,"1","0")
+  
+  d1%>%
+  mutate(mycondition=factor(mycondition,levels = c("regular","irregular"),labels = c("Regular","Irregular")))%>%
+  ggplot(aes(x=pro, y=state, fill=prob)) + 
+  facet_wrap(~mycondition)+
+  geom_tile()+
+  geom_text(aes(label = mylabel,color=label_col),size=6)+
+  scale_color_manual(values = c("black","white"),guide="none")+
+  scale_fill_gradientn(colours = c("white","black"))+
   theme_bw()+
-    theme(text = element_text(size=12),
-  axis.text=element_text(colour="black"),
-  panel.grid = element_blank(),
-  strip.background =element_rect(fill="white",color="white"))+
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank())
+  xlab("Groud truth")+
+  ylab("People")+  
+  theme_bw()+  
+  theme(text = element_text(size=17),
+    axis.text=element_text(colour="black"),
+    strip.text.x = element_text(size = 12),
+    panel.grid = element_blank(),
+    strip.background =element_rect(fill="white",color="white"),
+    legend.position ="none")
 }
 
-df.comb %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
-  rbind(mutate(df.comb,paired=A_pro,state=B_state,gd=B_pro))%>%
-  myPairFrePlot()+
-  ylab("Proportion")+
-  theme(legend.position ="right")
+df.comb %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state))%>%
+  myMatPlot()
 
+# ggsave(file="exp_mat_ppl.pdf",width = 7,height = 4)
+
+
+md.sim[["nor"]] %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(mutate(md.sim[["nor"]],pro=B_pro,state=B_state))%>%  myMatPlot()+
+  ylab("Model")
+
+# ggsave(file="exp_mat_nor.pdf",width = 7,height = 4)
+
+md.sim[["feai"]] %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(mutate(md.sim[["feai"]],pro=B_pro,state=B_state))%>%  myMatPlot()+
+  ylab("Model")
+
+# ggsave(file="exp_mat_feai.pdf",width = 7,height = 4)
+
+md.sim[["feaw"]] %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(mutate(md.sim[["feaw"]],pro=B_pro,state=B_state))%>%  myMatPlot()+
+  ylab("Model")
+
+# ggsave(file="exp_mat_feaw.pdf",width = 7,height = 4)
 ```
 
+```{r}
+d1=df.comb %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state))%>%
+      group_by(mycondition,pro,state)%>%
+      dplyr::summarise(n=n())
 
-###pair-frequency
+x=d1 %>% filter(pro=="G"& state!="G" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="N"& state!="N" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="P"& state!="P" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="G"& state!="G" & mycondition=="irregular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="N"& state!="N" & mycondition=="irregular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="P"& state!="P" & mycondition=="irregular")
+chisq.test(x$n)
+```
+
+## paried
 ```{r }
 myPairFrePlotGd<-function(df){
   df%>% ggplot(aes(x=interaction(paired,gd),fill=state))+
@@ -457,7 +411,14 @@ df.comb %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
   ylab("Proportion")+
   theme(legend.position ="right")
 
-ggsave(file="exp_frequency_human.pdf",width = 9,height = 3.3)
+
+df.comb %>% mutate(paired=B_state,state=A_state,gd=A_pro)%>%
+  rbind(mutate(df.comb,paired=A_state,state=B_state,gd=B_pro))%>%
+  myPairFrePlotGd()+
+  ylab("Proportion")+
+  theme(legend.position ="right")
+
+# ggsave(file="exp_frequency_human.pdf",width = 9,height = 3.3)
 
 md.sim[["nor"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
   rbind(mutate(md.sim[["nor"]],paired=A_pro,state=B_state,gd=B_pro))%>%
@@ -466,7 +427,7 @@ md.sim[["nor"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
         strip.text.x = element_text(size = 8),
         axis.title.y = element_blank(),legend.position ="none")
 
-ggsave(file="exp_frequency_nor.pdf",width =3.6,height = 1.6)
+# ggsave(file="exp_frequency_nor.pdf",width =3.6,height = 1.6)
 
 md.sim[["feaw"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
   rbind(mutate(md.sim[["feaw"]],paired=A_pro,state=B_state,gd=B_pro))%>%
@@ -476,7 +437,7 @@ md.sim[["feaw"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
       axis.title.y = element_blank(),legend.position ="none",
       axis.ticks.y = element_blank())
 
-ggsave(file="exp_frequency_feaw.pdf",width =3.6,height = 1.6)
+# ggsave(file="exp_frequency_feaw.pdf",width =3.6,height = 1.6)
 
 
 md.sim[["feai"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
@@ -487,22 +448,14 @@ md.sim[["feai"]] %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
       axis.title.y = element_blank(),legend.position ="none",
       axis.ticks.y = element_blank())
 
-ggsave(file="exp_frequency_feai.pdf",width =3.6,height = 1.6)
+# ggsave(file="exp_frequency_feai.pdf",width =3.6,height = 1.6)
 ```
 
 ```{r}
-df=df.comb %>% mutate(paired=B_pro,state=A_state,gd=A_pro)%>%
-  rbind(mutate(df.comb,paired=A_pro,state=B_state,gd=B_pro))
-write.csv(df,file="multinom.csv",row.names = F)
-```
-
-```{r}
-summarySE(df.f1,measurevar = "rec",groupvars = c("state","mycondition"))
-t.test(rec~mycondition,df.f1[df.f1$state=="P",],var.equal = T)
-df.f1.1=df.f1[df.f1$state=="P",]
-cohen.d(df.f1.1$rec,df.f1.1$mycondition)
-t.test(rec~mycondition,df.f1[df.f1$state=="N",])
-t.test(rec~mycondition,df.f1[df.f1$state=="G",])
+x=df.comb %>% mutate(pro=A_pro,state=A_state,paired=B_pro)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state,paired=B_pro))%>%
+  filter(pro=="N"& state!="N" & mycondition=="irregular")
+chisq.test(table(x$paired,x$state))
 ```
 
 #order effect
@@ -604,8 +557,6 @@ summarySE(pic,measurevar = "acc",groupvars = c("ord","mycondition"))%>%
     legend.margin=margin(-5,0,0,0))
 
 # ggsave(file="f_exp_ord.pdf",width = 6.5,height = 5)
-
-ggsave(file="f_exp_ord.pdf",width = 6.5,height = 5)
 ```
 
 ```{r}
@@ -625,10 +576,8 @@ tmp2 %>%
   MANOVA(dvs="L1G1:L3G3", dvs.pattern="L(.)G(.)",between=c("mycondition"),within=c("L","G")) %>%
   EMMEANS("L",by="G")
 
-0.05/6
-
-tmp%>%subset(mycondition=="regular" & gd=="G")
-aov(acc~ord,tmp%>%subset(mycondition=="regular" & gd=="G")) %>% summary()
+tmp%>%subset(mycondition=="irregular" & gd=="P")
+aov(acc~ord,tmp%>%subset(mycondition=="regular" & gd=="P")) %>% summary()
 
 ```
 
@@ -651,7 +600,7 @@ df.comb %>% mutate(state=A_state,gd=A_pro,ord=as.factor(order_a))%>%
   strip.background =element_rect(fill="white",color="black" ),
   strip.placement = "outside")
 
-ggsave(file="exp_order_human.pdf",width = 9,height = 4)
+# ggsave(file="exp_order_human.pdf",width = 9,height = 4)
 ```
 
 ```{r}
@@ -695,22 +644,20 @@ myOrdMDPlot<-function(df){
 mdall%>% mutate(acc=nor)%>% 
   myOrdMDPlot()
 
-ggsave(file="exp_order_nor.pdf",width =5.5,height = 4)
+# ggsave(file="exp_order_nor.pdf",width =5.5,height = 4)
 
 #feai
 mdall%>% mutate(acc=fea_w4)%>% 
   myOrdMDPlot()+
   theme(axis.ticks.y = element_blank())
   
-ggsave(file="exp_order_feaw.pdf",width =5.5,height = 4)
+# ggsave(file="exp_order_feaw.pdf",width =5.5,height = 4)
 
 #feai
 mdall%>% mutate(acc=fea_i)%>% 
   myOrdMDPlot()+
   theme(axis.ticks.y = element_blank())
 
-ggsave(file="exp_order_feai.pdf",width =5.5,height = 4)
-
-
+# ggsave(file="exp_order_feai.pdf",width =5.5,height = 4)
 ```
 
