@@ -9,32 +9,50 @@ source('fun_softmax.R')
 
 set.seed(2)
 
+
+mdall=expand.grid(choice=c("GG","GN","GP","NG","NN","NP","PG","PN","PP"),
+                  id=c(1:8))%>%
+  mutate(stiID=paste("S",id,sep=""),nor=0,fea_i=0,fea_w=0,people=0)
+
 load("exp2.Rda")
-load('mdall_exp2.Rda')
-
-#randomBIC
-round(2*nrow(df.final)*log(0.11))
-round(nrow(df.final)*log(0.11))
-
-#model fitting
-mdall$people=0
-for (k in 1:nrow(mdall)){
-  sub=df.final %>% subset(seed==mdall$seed[k] & trial_type== mdall$trial_type[k] &
-                          choice==mdall$choice[k] & mycondition==mdall$mycondition[k])
-  mdall$people[k]=nrow(sub)
+df.off$choice=paste(df.off$A_state,df.off$B_state,sep="")
+load('sti_exp2/PG.Rda')
+for (k in 1:4){
+  a_idx=which(mdall$stiID==paste("S",k,sep="") )
+  mdall$nor[a_idx]=b_nor[[paste("S",k,sep="")]]
+  mdall$fea_i[a_idx]=b_ssi[[paste("S",k,sep="")]]
+  mdall$fea_w[a_idx]=b_ssw[[paste("S",k,sep="")]]
+  
+  for (m in a_idx){
+    sub=df.off %>% subset(trID==mdall$id[m]+6 & choice==mdall$choice[m])
+    mdall$people[m]=nrow(sub)
+  }
 }
-
-var_list=list("feai"=c("fea_i"),"nor"=c("nor"),#"feaANDnor"=c("fea_i","nor"),
-              "delayi"=c("delay_i"),"counti"=c("count_i"))
-for (k in c(1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7)){
-  var_list[[paste("feaw",k,sep="")]]=paste("fea_w",k,sep="")
-  if (k ==4){
-    var_list[[paste("delayw",k,sep="")]]=paste("delay_w",k,sep="")
-    var_list[[paste("countw",k,sep="")]]=paste("count_w",k,sep="")
+load('sti_exp2/GN.Rda')
+for (k in 5:8){
+  a_idx=which(mdall$stiID==paste("S",k,sep=""))
+  mdall$nor[a_idx]=b_nor[[paste("S",k,sep="")]]
+  mdall$fea_i[a_idx]=b_ssi[[paste("S",k,sep="")]]
+  mdall$fea_w[a_idx]=b_ssw[[paste("S",k,sep="")]]
+  
+  for (m in a_idx){
+    sub=df.off %>% subset(trID==mdall$id[m]+6 & choice==mdall$choice[m])
+    mdall$people[m]=nrow(sub)
   }
 }
 
-vals=mdall
+# save(mdall,file="mdall_exp2.Rda")
+
+#random
+-round(2*sum(mdall$people)*log(0.11))
+round(sum(mdall$people)*log(0.11))
+
+
+#model fitting
+var_list=list("feai"=c("fea_i"),"nor"=c("nor"),"feaw"=c("fea_w"))
+
+
+vals=mdall %>% mutate(uni_id=stiID)
 loglen=sum(vals$people)
 BIC.list=list()
 for (k in 1:length(var_list)){
@@ -55,6 +73,7 @@ for (k in 1:length(var_list)){
 }
 
 CV.list=list()
+vals =vals %>% mutate(trType=ifelse(id %in% c(1:4),"PG","GN"))
 for (k in 1:length(var_list)){
   varsname=var_list[[k]]
   vals=as.data.frame(vals)
@@ -68,9 +87,9 @@ for (k in 1:length(var_list)){
     vals=as.data.table(vals)
   }
   
-  for (m in unique(vals$seed)){
-    vals1=vals %>% subset(seed!=m)
-    vals2=vals %>% subset(seed==m)
+  for (m in unique(vals$trType)){
+    vals1=vals %>% subset(trType!=m)
+    vals2=vals %>% subset(trType==m)
     if (length(varsname)==1){
       CV.list[[names(var_list)[k]]][[m]]=optim(0.1,MyMdFit,vals=vals1,method = "Brent",lower = -30,upper = 30)
       cv_log=c(cv_log,MyMdFit(CV.list[[names(var_list)[k]]][[m]]$par,vals2))
@@ -81,18 +100,18 @@ for (k in 1:length(var_list)){
   }
   CV.list[[names(var_list)[k]]][["cv_log"]]=sum(cv_log)
 }
-save(CV.list,BIC.list,file = "modelFit_exp2.Rda")
 
 #individual fit
+df.off=df.off %>% mutate(choice=paste(A_state,B_state,sep=""))
 subvec=as.character(unique(df.dmg$subject))
-var_list_idd=list("nor"=c("nor"),"feai"=c("fea_i"),"feaw"=c("fea_w4"))
+var_list_idd=list("nor"=c("nor"),"feai"=c("fea_i"),"feaw"=c("fea_w"))
 
 MyIndFit<-function(subk){
-  mdsub=mdall
+  mdsub=mdall %>% mutate(uni_id=id)
   mdsub$people=0
   for (k in 1:nrow(mdsub)){
-    sub=df.final %>% subset(subject==subk &seed==mdall$seed[k] & trial_type== mdall$trial_type[k] &
-                              choice==mdall$choice[k] & mycondition==mdall$mycondition[k])
+    sub=df.off %>% subset(subID==subk & trID== mdsub$id[k]+6 &
+                              choice==mdsub$choice[k])
     mdsub$people[k]=nrow(sub)
   }
   trlist=mdsub$uni_id[which(mdsub$people>0)]
@@ -133,7 +152,7 @@ MyIndFit<-function(subk){
   save(BIC.idd,CV.idd,file=paste(fldnew,"/",subk,".Rda",sep=""))
 }
 
-loglen=18
+loglen=8
 fldnew="softmax_exp2"
-wholelist=as.list(as.character(unique(df.dmg$subject)))
+wholelist=as.list(as.character(unique(df.off$subID)))
 mclapply(wholelist,MyIndFit,mc.cores=4)

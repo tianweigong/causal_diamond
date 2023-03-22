@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- saved from url=(0066)https://www.bramleylab.ppls.ed.ac.uk/experiments/tia/diamond_demo/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="stylesheet" href="static/css/styles.css">
+	<script src="static/lib/jquery.min.js"></script>
+	<title>Experiment</title>
+</head>
+<body data-new-gr-c-s-check-loaded="14.1082.0" data-gr-ext-installed="">
+	<div id="experiment">
+		<h1>Experiment</h1>
+		<div style="margin-left: 30px;margin-bottom: 10px;">	("A" is the one on the bottom and "B" is the one on the top.)</div>
+		<div class="frame_big">
+			<div id="frame_main">
+				<div class="frame_button" id="frame_button_A" style="margin-top: 260px;">
+		    		<div class="light_button" id="light_button_A"></div>
+		    		<div class="frame_hand" id="frame_hand_A" style="visibility: hidden;"><img class="hand" src="static/images/hand.png"></div>
+	    		</div>
+				<div class="frame_button" id="frame_button_B" style="margin-top: 35px;">
+		    		<div class="light_button" id="light_button_B"></div>
+		    		<div class="frame_hand" id="frame_hand_B" style="visibility: hidden;"><img class="hand" src="static/images//hand.png"></div>
+	    		</div>
+	    		<div class="light_bulb" id="frame_bulb"></div>
+	    		<div class="frame_line" id="frame_line_A" onclick="ClickA()" style="margin-top: 208px; transform: rotate(-25deg);">
+		    			<div class="arrow_line" id="arrow_line_A"><div class="arrow_hint noselect" id="arrow_hint_A"><span style="font-size:15px;font-weight:bold;color:black">Click Here</span></div></div>
+		    			<div class="arrow_point" id="arrow_point_A"></div>
+	    		</div>
+	    		<div class="frame_line" id="frame_line_B" onclick="ClickB()" style="margin-top: 98px; transform: rotate(25deg);">
+		    			<div class="arrow_line" id="arrow_line_B"><div class="arrow_hint noselect" id="arrow_hint_B"><span style="font-size:15px;font-weight:bold;color:black">Click Here</span></div></div>
+		    			<div class="arrow_point" id="arrow_point_B"></div>
+	    		</div>
+			</div>
+			<p id="hint">Click <b>Start</b> to watch the clip for this device.</p>
+		</div>
+		<div class="button_panel" style="margin-top: 10px;">
+
+			<form>
+				Experiment: 
+				<select name="Experi" id="Experi" required="" style="margin-bottom:10px;" onchange="mychoice()">
+	            	<option value="exp2">Experiment 1a</option>
+	            	<option value="exp3">Experiment 1b</option>
+	            	<option value="exp4">Experiment 2</option>
+		        </select>
+		        &nbsp&nbsp
+				Condition: 
+				<select name="Delay" id="Delay" required="" style="margin-bottom:10px;" onchange="mychoice()">
+	            	<option value="r">Regular</option>
+	            	<option value="u">Irregular (for Exp1a and 1b)</option>
+		        </select>
+		        &nbsp&nbsp
+		        Seed: 
+		        <select name="Seed" id="Seed" required="" style="margin-bottom:10px;" onchange="mychoice()">
+	            	<option value="seed1">seed 1</option><option value="seed2">seed 2</option>
+	            	<option value="seed3">seed 3</option><option value="seed4">seed 4</option>
+	            	<option value="seed5">seed 5  (for Exp1a and 1b)</option><option value="seed6">seed 6  (for Exp1a and 1b)</option>
+	            	<option value="seed7">seed 7  (for Exp1a and 1b)</option><option value="seed8">seed 8  (for Exp1a and 1b)</option>
+	            	<option value="seed9">seed 9  (for Exp1a and 1b)</option><option value="seed10">seed 10  (for Exp1a and 1b)</option>
+	            	<option value="seed11">seed 11  (for Exp1a and 1b)</option><option value="seed12">seed 12  (for Exp1a and 1b)</option>
+	            	<option value="seed13">seed 13  (for Exp1a)</option><option value="seed14">seed 14 (for Exp1a)</option>
+	            	<option value="seed15">seed 15 (for Exp1a)</option><option value="seed16">seed 16 (for Exp1a)</option>
+	            	<option value="seed17">seed 17 (for Exp1a)</option><option value="seed18">seed 18 (for Exp1a)</option>
+		        </select>
+		        &nbsp&nbsp
+		        Structure: 
+		        <select name="Structure" id="Structure" required="" onchange="mychoice()">
+	            	<option  value="gg">GG (for Exp1a and 1b) </option>
+	            	<option  value="gn">GN</option>
+	            	<option  value="gp">GP (for Exp1a and 1b)</option>
+	            	<option  value="ng">NG (for Exp1a and 1b)</option>
+	            	<option  value="nn">NN (for Exp1a and 1b)</option>
+	            	<option  value="np">NP (for Exp1a and 1b)</option>
+	            	<option  value="pg">PG</option>
+	            	<option  value="pn">PN (for Exp1a and 1b)</option>
+	            	<option  value="pp">PP (for Exp1a and 1b)</option>
+		        </select>
+			</form>
+
+		</div>
+	</div>
+
+	<div align="center" style="width: 100pt; margin-left: auto;margin-right: auto;">
+		<button type="button" id="exp_start" onclick="TrialStart()">Start</button>
+	</div>
+
+	<script src="static/js/myseed_exp4.js"></script>
+	<script src="static/js/myseed_exp2.js"></script>
+	<script src="static/js/myseed_exp3.js"></script>
+	<script src="static/js/script.js"></script>
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

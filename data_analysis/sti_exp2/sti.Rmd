@@ -1,0 +1,149 @@
+---
+title: "sti"
+output: html_document
+date: "2023-03-05"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(parallel)
+library(matrixStats)
+library(ggplot2)
+library(spatstat)
+library(patchwork)
+```
+
+```{r}
+trial_end=whole_trial_end=20
+s_ab=3
+k_pe = 36
+r_pe = 12 #preventative p->e: m=3,var=0.25
+k_ge = 9
+r_ge = 6  #generative g->e: m=1.5,var=0.25
+
+baserate=5
+baserate_var=0.25
+r_e_r = baserate/baserate_var
+k_e_r = r_e_r*baserate
+k_e_u=1
+r_e_u=1/baserate
+
+source("../fun_nor.R")
+load("../df.expect.Rda")
+df.e=df.expect %>% gather(cue, val, A_delay:B_numw5) %>% na.omit()
+```
+
+```{r}
+df.sti=read.csv("sti.csv")
+```
+
+```{r}
+df.sti%>%
+  mutate(stiType=factor(stiType,levels=c("PG","GN"),
+                        labels=c("Preventative (Lure) and Generative (Target)",
+                                 "Generative (Lure) and Non-causal (Target)")))%>%
+  ggplot(aes(x=time,y=stiID))+
+  facet_wrap(~stiType,ncol=1)+
+  geom_rect(aes(xmin=time-0.05, xmax= time+0.05,ymin=stiID-0.2,ymax=stiID+0.2,fill=obj))+
+  theme_classic()+
+  xlab("Time")+
+  scale_y_continuous(breaks = c(1:6))+
+  scale_y_reverse()+
+  scale_fill_manual("Activation",values=c("#b149ff","#00A89D","#FFB34D"),
+                    labels=c("Lure","Target","Effect"))+
+  theme(text = element_text(size=14),
+        axis.title.y = element_blank(),
+        legend.margin=margin(-5,0,0,0),
+        legend.position = "bottom"
+        )
+
+# ggsave(file="exp2_sti.pdf",width = 11,height = 6)
+```
+
+```{r}
+# df.sti2=df.sti %>% subset(stiType=="PG") %>%
+#   mutate(stiID=factor(stiID,labels = c("S1","S2","S3","S4")))
+
+df.sti2=df.sti %>% subset(stiType=="GN") %>%
+mutate(stiID=factor(stiID,labels = c("S5","S6","S7","S8")))
+
+b_nor=split(df.sti2,df.sti2$stiID) %>%
+  lapply(., function(sqc){MyMdNor(sqc,k_e_r,r_e_r,k_pe,r_pe,k_ge,r_ge)})
+
+# b_nor_u=split(df.sti2,df.sti2$stiID) %>%
+#   lapply(., function(sqc){MyMdNor(sqc,k_e_u,r_e_u,k_pe,r_pe,k_ge,r_ge)})
+
+numcue=c("A_numi","B_numi")
+varname=c('delay_i',"count_i")
+combined_var="fea_i"
+modname="feai"
+segmod="intervention"
+source("../fun_fea.R")
+
+b_ssi=split(df.sti2,df.sti2$stiID) %>%
+  lapply(., function(sqc){d=MyMdFea(sqc,"r");rowSums(d)/sum(d)})
+
+# b_ssi_u=split(df.sti2,df.sti2$stiID) %>%
+#   lapply(., function(sqc){d=MyMdFea(sqc,"u");rowSums(d)/sum(d)})
+
+win_len=4
+numcue=paste(c("A_numw","B_numw"),4,sep="")
+varname=paste(c('delay_w',"count_w"),4,sep="")
+combined_var=paste("fea_w",4,sep="")
+modname=paste("feaw",4,sep = "")
+segmod="window"
+source("../fun_fea.R")
+
+b_ssw=split(df.sti2,df.sti2$stiID) %>%
+  lapply(., function(sqc){d=MyMdFea(sqc,"r");rowSums(d)/sum(d)})
+
+# b_ssw_u=split(df.sti2,df.sti2$stiID) %>%
+#   lapply(., function(sqc){d=MyMdFea(sqc,"u");rowSums(d)/sum(d)})
+
+# save(b_nor,b_ssi,b_ssw,file="PG.Rda")
+ # save(b_nor,b_ssi,b_ssw,file="GN.Rda")
+```
+
+```{r}
+myPic<-function(md){
+  pic=data.frame()
+  for (k in names(md)){
+    bl=expand.grid(id=k,nod=c("A","B"),pred=c("G","N","P"),prob=NA)
+    lis=list("A"= rep(c("G","N","P"),each=3),"B"=rep(c("G","N","P"),3))
+    for (i in 1:nrow(bl)){
+      bl$prob[i]=sum(md[[k]][which(lis[[bl$nod[i]]]==bl$pred[i])])
+    }
+    pic=rbind(pic,bl)
+  }
+  
+  pic %>%
+    mutate(nod=factor(nod,levels=c("A","B"),labels=c("Lure","Target")))%>%
+    ggplot(aes(x=nod ,y=prob,fill=pred))+
+    facet_wrap(~id,ncol=4)+
+    # scale_fill_grey(start = 0.35, end = 0.95)+
+    scale_y_continuous(limits = c(0,1.1))+
+    scale_fill_manual(values=c("#66A61E","#666666","#E6AB02"))+
+    geom_bar(stat="identity",position=position_dodge(.9),color="black")+
+    geom_text(aes(label = pred),position=position_dodge(.9),vjust=-0.5,size=2.5)+
+    theme_classic()+
+    theme(legend.position ="none",
+          axis.title=element_blank())
+}
+
+p1=myPic(b_nor)+ggtitle("Normative")
+p2=myPic(b_ssi)+ggtitle("Summary-statistic (Intervention)")+
+   theme(axis.title.y=element_blank(),
+         axis.ticks.y=element_blank(),
+          axis.text.y = element_blank())
+p3=myPic(b_ssw)+ggtitle("Summary-statistic (Fixed)")+
+     theme(axis.title.y=element_blank(),
+         axis.ticks.y=element_blank(),
+          axis.text.y = element_blank())
+
+p1+p2+p3
+
+# ggsave(file="exp2_pred2.pdf",width = 11,height = 2)
+```

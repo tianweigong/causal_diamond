@@ -1,0 +1,160 @@
+---
+title: "dataAnalysis_2"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#package
+```{r}
+library(dplyr)
+library(ggplot2)
+library(effsize)
+set.seed(2)
+```
+
+#loading
+```{r}
+load("exp2.Rda")
+load("mdall_exp2.Rda")
+mdall=mdall %>% mutate(uni_label=stiID,ppl=people)
+```
+
+# add model prediction
+```{r}
+mySim<-function(pr,sf,amp=200){
+  md=data.frame()
+  for (k in unique(mdall$uni_label)){
+    d=mdall%>% subset(uni_label==k)
+    df=subset(d,select = c("id","uni_label"))
+    df=df[rep(1,num*amp),]
+    p=exp(d[,pr]/sf)
+    df$choice=sample(d$choice,size=num*amp,prob=p/sum(p),replace = T)
+    df=df%>%mutate(A_state=substr(choice,1,1),B_state=substr(choice,2,2))
+    md=rbind(md,df)
+  }
+  return(md)
+}
+
+num=60
+md.nor=mySim("nor",4.426424)
+md.feai=mySim("fea_i",0.1911737)
+md.feaw=mySim("fea_w",0.3412561)
+md.sim=list("nor"=md.nor,"feai"=md.feai,"feaw"=md.feaw)
+```
+
+```{r}
+df.test=data.frame()
+for (k in  unique(df.off$subID)){
+  d=expand.grid(subID=k,trType=c("PG","GN"),
+                cause=c("Lure","Target")
+                )%>%
+    mutate(G=0,N=0,P=0)
+  
+  for (m in 1:nrow(d)){
+    sub=df.off %>% subset(subID==k & trID>6 & trType==d$trType[m])
+    if (d$cause[m]=="Lure"){col="A_state"}else{col="B_state"}
+    d$G[m]=sum(sub[,col]=="G")
+    d$N[m]=sum(sub[,col]=="N")
+    d$P[m]=sum(sub[,col]=="P")
+  }
+  df.test=rbind(df.test,d)
+}
+```
+
+```{r}
+df.md=data.frame()
+for (k in 1:length(md.sim)){
+    df=expand.grid(
+      trType=c("PG","GN"),
+      cause=c("Lure","Target"),
+      name=c("G","N","P")) %>% 
+    mutate(md=names(md.sim)[k],value=0)
+    
+    for (m in 1:nrow(df)){
+      if (df$cause[m]=="Lure"){col="A_state"}else{col="B_state"}
+      if (df$trType[m]=="PG"){uni=paste("S",c(1:4),sep="")}else{uni=paste("S",c(5:8),sep="")}
+      sub=md.sim[[k]] %>% subset(uni_label %in%uni)
+      
+      df$value[m]=sum(sub[,col]==df$name[m])/(60*200)
+    }
+
+  df.md=rbind(df.md,df)
+}
+
+# df.md=df.md %>% 
+#     mutate(md2=factor(md,levels=c("nor","feai","feaw"),
+#          labels=c("Normative","Summary-statistic (intervention)","Summary-statistic  (fixed)")) )
+```
+
+
+```{r}
+df.test %>% 
+  pivot_longer(cols = c("G","N","P"))%>%
+  summarySE(measurevar = "value",groupvars = c("trType","cause","name"))%>%
+  ggplot(aes(x=cause,y=value,fill=name))+
+  # facet_wrap(~trType, labeller=labeller(trType=c("PG"="Preventative (Lure) and Generative (Target)",
+  #                                "GN"="Generative (Lure) and Non-causal (Target)")))+
+  facet_wrap(~trType)+
+  ylab("Frequency")+
+  geom_bar(stat="identity",position=position_dodge(.9),color="black")+
+  geom_errorbar(aes(ymin = value-ci,ymax = value+ci),width=0,size=0.8,position=position_dodge(.9))+
+  scale_fill_grey(start = 0.5, end = 1,labels=c("Generative","Non-causal","Preventative"))+
+  # 
+  # geom_point(data=subset(df.md,md=="nor"),aes(x=cause,y=value,group=name),position=position_dodge(.9),color=alpha("#c77cff",.7),size=2.5)+
+  #   geom_point(data=subset(df.md,md=="feai"),aes(x=cause,y=value,group=name),position=position_dodge(.9),color=alpha("#66A61E",.7),size=2.5)+
+  #   geom_point(data=subset(df.md,md=="feaw"),aes(x=cause,y=value,group=name),position=position_dodge(.9),color=alpha("coral2",.7),size=2.5)+
+  theme_classic()+
+  scale_y_continuous(limits = c(0,3.6))+
+    theme(text = element_text(size=12),
+    axis.text=element_text(colour="black"),
+    strip.text.x = element_text(size = 14),
+    legend.position = "bottom",legend.title=element_blank())+
+    theme(axis.title.x = element_blank(),
+        legend.margin=margin(-5,0,0,0))
+
+# ggsave(file="exp2_main.pdf",width = 7,height = 4)
+```
+
+```{r}
+df1=df.test %>% subset(trType=="PG" & cause=="Target")
+
+mean(df1$N)
+sd(df1$N)
+
+t.test(df1$N,mu=4/3)
+cohen.d(df1$N,f=NA,mu=4/3,noncentral=T)
+
+t.test(df1$G,df1$N,paired =T)
+cohen.d(df1$G,df1$N,noncentral=T)
+
+t.test(df1$N,df1$P,paired =T)
+cohen.d(df1$N,df1$P,noncentral=T)
+```
+
+```{r}
+df1=df.test %>% subset(trType=="GN" & cause=="Target")
+
+mean(df1$G)
+sd(df1$G)
+
+t.test(df1$N,mu=4/3)
+cohen.d(df1$N,f=NA,mu=4/3,noncentral=T)
+
+t.test(df1$G,df1$N,paired =T)
+cohen.d(df1$G,df1$N,noncentral=T)
+
+t.test(df1$G,df1$P,paired =T)
+cohen.d(df1$G,df1$P,noncentral=T)
+```
+
+```{r}
+df1=df.test %>% subset(trType=="GN" & cause=="Lure")
+df2=df.test %>% subset(trType=="GN" & cause=="Target")
+t.test(df1$G,df2$G,paired =T)
+cohen.d(df2$G,df1$G,noncentral=T)
+```

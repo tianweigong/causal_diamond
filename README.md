@@ -2,7 +2,7 @@
 
 material for a project of how people learn generative and preventative causal structures in continuous time. 
 
-## You can watch the stimuli [here](https://eco.ppls.ed.ac.uk/~s1940738/demo/diamond/).
+## <span style="color:orange;">You</span><span style="color:green;">can</span><span style="color:blue;">watch</span><span style="color:yellow;">the</span><span style="color:red;"> stimuli</span>[here](https://eco.ppls.ed.ac.uk/~s1940738/demo/diamond/).
 
 
 ## Data_analysis
@@ -14,23 +14,22 @@ material for a project of how people learn generative and preventative causal st
 
 #### data files
 
-* `exp1.Rda`, `exp2.Rda`, `exp3.Rda`
+* `exp1a.Rda`, `exp1b.Rda`, `exp2.Rda`, `exp_pilot.Rda`
 
 #### stimulus files
 
-* `sti_exp1`, `sti_exp2`, `sti_exp3` -- stimuli in three experiments
-* `eff_exp2.Rda`, `eff_exp3.Rda` -- some stimulus information
+* `sti_exp1a`, `sti_exp1b`, `sti_exp2`, `sti_exp_pilot` -- stimuli in three experiments
 
 #### modeling
 
-* `fun_fea.R`, `fun_nor.R`  -- normative and summary-statistic models, and their predictions for stimuli in Experiment 1-3
+* `fun_fea.R`, `fun_nor.R`  -- normative and summary-statistic models, and their predictions for stimuli in Experiment 1-2
 * `sim_fea.R`, `sim_fea`, `df.expect.Rda` -- generating simlations for summary-statistic models
 * `fun_softmax.R` -- softmax functions
-* `md_all_exp1.R`, `md_all_exp2.R`, `md_all_exp3.R`, `modelFit_exp1.Rda`, `modelFit_exp2.Rda`, `modelFit_exp3.Rda`-- code to get the model predictions for each stimulus
-* `mdall_exp1.Rda`, `mdall_exp2.Rda`, `mdall_exp3.Rda` -- the model predictions for each stimulus
-* `softmax_exp1.R`, `softmax_exp2.R`, `softmax_exp3.R`, `softmax_exp1`, `softmax_exp2`, `softmax_exp3`, `softmax_report.R` -- code to fit participants' data on the aggragate and individual levels, and their results
-* `softmax_exp2_cond.R`, `softmax_exp3_cond.R`, `softmax_exp3_gt.R`, `softmax_exp3_ngt.R`  -- other fitting results seperate by conditions or with or without ground truths. 
+* `md_exp1a.R`, `md_exp1b.R`,  `model_exp_pilot` -- code to get the model predictions for each stimulus
+* `mdall_exp1a.Rda`, `mdall_exp1b.Rda`, `mdall_exp2.Rda` -- the model predictions for each stimulus
+* `softmax_exp1a.R`, `softmax_exp1b.R`, `softmax_exp2.R`,`softmax_exp_pilot.R`, `softmax_report.R` -- code to fit participants' data on the aggragate and individual levels, and their results
+* `softmax_exp1a_cond.R`, `softmax_exp1b_cond.R`, `softmax_exp1b_gt.R`, `softmax_exp1b_ngt.R`  -- other fitting results seperate by conditions or with or without ground truths. 
 
 ## procedure
 
-HTML for Experiment 1-3.
+HTML for Experiment 1-2.

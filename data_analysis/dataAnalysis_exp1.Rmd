@@ -1,0 +1,556 @@
+---
+title: "dataAnalysis_comb"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#package
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(Rmisc)
+library(reshape2)
+library(effsize)
+library(data.table)
+library(bruceR)
+library(ggpubr)
+library(lmerTest)
+library(patchwork)
+set.seed(2)
+```
+
+#loading
+```{r}
+load("exp1a.Rda")
+df.final$mycondition=factor(df.final$mycondition,levels = c("regular","irregular"))
+df1=df.final %>% mutate(exp="exp1a",choice=NULL)
+df1.link=df1%>%select("subject","acc_a","A_pro","mycondition","exp")%>%mutate(acc=acc_a,pro=A_pro,acc_a=NULL,A_pro=NULL) %>% 
+  rbind(df1%>%select("subject","acc_b","B_pro","mycondition","exp")%>%mutate(acc=acc_b,pro=B_pro,acc_b=NULL,B_pro=NULL)) %>%
+  summarySE(measurevar = "acc",groupvars = c("subject","mycondition","exp"))
+df1.device=df1%>% summarySE(measurevar = "acc_device",groupvars = c("subject","mycondition","exp"))
+
+load("exp1b.Rda")
+df.final$mycondition=factor(df.final$mycondition,levels = c("regular","irregular"))
+df2=df.final %>% subset(trial_order<10) %>% mutate(exp="exp1b")
+df2wog=df.final %>% subset(trial_order>=10) %>% mutate(exp="exp1b")
+df2.link=df2%>% select("subject","acc_a","A_pro","mycondition","exp")%>%mutate(acc=acc_a,pro=A_pro,acc_a=NULL,A_pro=NULL) %>% 
+  rbind(df2 %>% select("subject","acc_b","B_pro","mycondition","exp")%>%mutate(acc=acc_b,pro=B_pro,acc_b=NULL,B_pro=NULL)) %>%
+  summarySE(measurevar = "acc",groupvars = c("subject","mycondition","exp"))
+df2.device=df2%>% subset(trial_order<10) %>% summarySE(measurevar = "acc_device",groupvars = c("subject","mycondition","exp"))
+```
+
+```{r}
+#add more information for df.comb
+df.comb1=rbind(df1,df2) %>% 
+  rbind(df2wog) %>%
+  mutate(uni_label=paste(exp,seed,trial_type,mycondition,sep = "_"),
+         uni_seed=paste(exp,seed,sep="_"),
+         choice=paste(A_state,B_state,sep=""),
+         uni_stiset=paste(exp,mystiset,sep="_"))
+
+ordlist=list("exp1a"=c("AAABBB","ABABAB","AABBAB",
+                      "ABBABA","AABABB","ABABBA",
+                      "ABBAAB","ABAABB","ABBBAA",
+                      "BAAABB","BAABAB","BABAAB",
+                      "BBBAAA","BBBAAA","BBAAAB",
+                      "BBABAA","BABBAA","BABABA"),
+              "exp1b"=c("ABABAB","BBAABA","BBBAAA",
+                       "AABBAB","BABABA","BAABAB",
+                       "ABAABB","AAABBB","BABBAA"))
+
+ordlevel=data.frame(lev=0,itv=c("ABABAB","BABABA"))%>%
+  rbind(data.frame(lev=1,itv=c("ABABBA","BABAAB","ABBABA","BAABAB")))%>%
+  rbind(data.frame(lev=2,itv=c("ABAABB","BABBAA","AABBAB","BBAABA","AABABB","BBABAA","ABBAAB","BAABBA")))%>%
+  rbind(data.frame(lev=3,itv=c("ABBBAA","AABBBA","BAAABB","BBAAAB")))%>%
+  rbind(data.frame(lev=4,itv=c("AAABBB","BBBAAA")))
+          
+df.ord=data.frame(uni_seed=c(paste("exp1a",1:18,sep="_"),paste("exp1b",1:9,sep="_")))%>% 
+  mutate(itv=NA,order_all=NA,order_a=NA,order_b=NA)
+for (k in 1:nrow(df.ord)){
+  if (k>18){o=ordlist[["exp1b"]][k-18]}else{o=ordlist[["exp1a"]][k]}
+  df.ord$itv[k]=o
+  df.ord$order_all[k]=ordlevel$lev[ordlevel$itv==o]
+  df.ord$order_a[k]=sum(diff(which(unlist(strsplit(o,""))=="A"))==1)
+  df.ord$order_b[k]=sum(diff(which(unlist(strsplit(o,""))=="B"))==1)
+}
+
+df.comb=df.comb1%>% merge(df.ord,by="uni_seed")#with only ground truth trials
+```
+
+# add model prediction
+```{r}
+mySim<-function(pr,sf,amp=200){
+  md=data.frame()
+  for (k in unique(md.comb$uni_label)){
+    d=md.comb%>% subset(uni_label==k)
+    df=subset(d,select = c("seed","trial_type","mycondition","exp","uni_seed","uni_label"))%>%
+      mutate(A_pro=substr(trial_type,1,1),B_pro=substr(trial_type,2,2))
+    df=df[rep(1,d$ppl[1]*amp),]
+    p=exp(d[,pr]/sf)
+    df$choice=sample(d$choice,size=d$ppl[1]*amp,prob=p/sum(p),replace = T)
+    df=df%>%mutate(A_state=substr(choice,1,1),B_state=substr(choice,2,2))
+    md=rbind(md,df)
+  }
+  return(md)
+}
+
+load("mdall_exp1a.Rda")
+md1=mdall %>% mutate(exp="exp1a",uni_seed=paste(exp,seed,sep="_"),
+                     uni_label=paste(uni_seed,trial_type,mycondition,sep = "_"))
+load("mdall_exp1b.Rda")
+md2=mdall %>% mutate(exp="exp1b",uni_seed=paste(exp,seed,sep="_"),
+                     uni_label=paste(uni_seed,trial_type,mycondition,sep = "_"))%>%
+  subset(select=colnames(md1))
+md.comb=rbind(md1,md2) %>% mutate(ppl=0)
+for (k in unique(md.comb$uni_label)){
+  md.comb$ppl[md.comb$uni_label==k]=sum(df.comb1$uni_label==k)
+}
+
+md.nor=mySim("nor",0.48)
+md.feai=mySim("fea_i",0.23)
+# md.feaw=mySim("fea_w4")
+md.sim1=list("nor"=md.nor,"feai"=md.feai)
+md.sim=list("nor"=subset(md.nor,exp=="exp1a" | seed< 10) ,
+            "feai"=subset(md.feai,exp=="exp1a" | seed< 10))
+
+#add more information
+for (k in 1:length(md.sim)){
+  md.sim[[k]]=md.sim[[k]]%>%
+    mutate(mycondition=factor(mycondition,levels=c("regular","irregular")),
+           acc_a=as.numeric(A_state==A_pro),
+           acc_b=as.numeric(B_state==B_pro))%>%
+    merge(df.ord,by="uni_seed")
+  # %>%
+  #   merge(subset(df.comb,select=c("uni_label","uni_stiset"),by="uni_label"))
+}
+# save(md.sim,md.sim1,file="md.sim.Rda")
+load("md.sim.Rda")
+```
+
+# each experiment
+```{r}
+df1.link %>% subset(mycondition=="regular") %>%pull(acc) %>% t.test(mu=1/3)
+df1.link %>% subset(mycondition=="regular") %>%pull(acc) %>% cohen.d(f=NA,mu=1/3,noncentral = T)
+
+df1.link %>% subset(mycondition=="irregular") %>%pull(acc) %>% t.test(mu=1/3)
+df1.link %>% subset(mycondition=="irregular") %>%pull(acc) %>% cohen.d(f=NA,mu=1/3,noncentral=T)
+
+tmp=df.comb %>% subset(exp=="exp1a") %>% group_by(subject,mycondition) %>% dplyr::summarise(acc_device=mean(acc_device))
+tmp %>% subset(mycondition=="regular") %>%pull(acc_device) %>% t.test(mu=1/9)
+tmp %>% subset(mycondition=="regular") %>%pull(acc_device) %>% cohen.d(f=NA,mu=1/9,noncentral = T)
+
+tmp %>% subset(mycondition=="irregular") %>%pull(acc_device) %>% t.test(mu=1/9)
+tmp %>% subset(mycondition=="irregular") %>%pull(acc_device) %>% cohen.d(f=NA,mu=1/9,noncentral = T)
+```
+
+```{r}
+df2.link %>% subset(mycondition=="regular") %>%pull(acc) %>% t.test(mu=1/3)
+df2.link %>% subset(mycondition=="regular") %>%pull(acc) %>% cohen.d(f=NA,mu=1/3,noncentral = T)
+
+df2.link %>% subset(mycondition=="irregular") %>%pull(acc) %>% t.test(mu=1/3)
+df2.link %>% subset(mycondition=="irregular") %>%pull(acc) %>% cohen.d(f=NA,mu=1/3,noncentral=T)
+
+tmp=df.comb %>% subset(exp=="exp1b") %>% group_by(subject,mycondition) %>% dplyr::summarise(acc_device=mean(acc_device))
+tmp %>% subset(mycondition=="regular") %>%pull(acc_device) %>% t.test(mu=1/9)
+tmp %>% subset(mycondition=="regular") %>%pull(acc_device) %>% cohen.d(f=NA,mu=1/9,noncentral = T)
+
+tmp %>% subset(mycondition=="irregular") %>%pull(acc_device) %>% t.test(mu=1/9)
+tmp %>% subset(mycondition=="irregular") %>%pull(acc_device) %>% cohen.d(f=NA,mu=1/9,noncentral = T)
+```
+
+# experiment difference
+```{r}
+t.test(acc~exp,subset(df,mycondition=="regular"),var.equal = T)
+t.test(acc~exp,subset(df,mycondition=="irregular"),var.equal = T)
+```
+
+```{r}
+df=rbind(df1.device,df2.device)
+t.test(acc_device~exp,subset(df,mycondition=="regular"),var.equal = T)
+t.test(acc_device~exp,subset(df,mycondition=="irregular"),var.equal = T)
+```
+
+#ANOVA one
+## 3(focal) * 3(neighbor) * 2(regularity)
+```{r}
+df.pairACC=df.comb %>% mutate(pro=A_pro,paired=B_pro,acc=acc_a)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,paired=A_pro,acc=acc_b))
+
+df.pairACC.wide=df.pairACC %>% reshape2:: dcast(subject+mycondition+exp~pro+paired,value.var = "acc",fun=mean)%>% rename(
+           replace = c("G_G" = "F1N1","G_N" = "F1N2","G_P" ="F1N3",
+                       "N_G" = "F2N1","N_N" = "F2N2","N_P" ="F2N3",
+                       "P_G" = "F3N1","P_N" = "F3N2","P_P" ="F3N3"))
+
+df.pairACC.wide %>% 
+  MANOVA(dvs="F1N1:F3N3", dvs.pattern="F(.)N(.)",within=c("F","N"),between = c("mycondition")) %>%
+  EMMEANS("F")%>%
+  EMMEANS("F",by="mycondition")%>%
+  EMMEANS("N",by="mycondition")
+```
+
+```{r}
+df.pairACC %>%
+  summarySE(measurevar ="acc",groupvars = c("pro","subject"))%>%
+  summarySE(measurevar ="acc",groupvars = c("pro"))
+
+df.pairACC %>%
+  summarySE(measurevar ="acc",groupvars = c("mycondition","subject"))%>%
+  summarySE(measurevar ="acc",groupvars = c("mycondition"))
+```
+
+
+## plot
+```{r}
+df.md.pro=data.frame()
+df.md.pair=data.frame()
+for (k in 1:length(md.sim)){
+  df.md=md.sim[[k]] %>% mutate(pro=A_pro,paired=B_pro,acc=acc_a)%>%
+    rbind(md.sim[[k]] %>% mutate(pro=B_pro,paired=A_pro,acc=acc_b)) %>%
+    mutate(md=names(md.sim)[k])
+  
+  d1=df.md %>%
+     summarySE(measurevar = "acc",groupvars =c("mycondition","pro","md"),na.rm=T)
+  d2=df.md %>%
+     summarySE(measurevar = "acc",groupvars =c("mycondition","paired","md"),na.rm=T)
+  
+  df.md.pro=rbind(df.md.pro,d1)
+  df.md.pair=rbind(df.md.pair,d2)
+}
+df.md.pro=df.md.pro %>% mutate(md=factor(md,levels=c("nor","feai"),labels=c("Normative","Summary-statistic")))
+df.md.pair=df.md.pair %>% mutate(md=factor(md,levels=c("nor","feai"),labels=c("Normative","Summary-statistic")))
+```
+
+```{r}
+df.pairACC %>%
+  summarySE(measurevar = "acc",groupvars = c("mycondition","pro","subject"),na.rm=T)%>% 
+  summarySE(measurevar = "acc",groupvars = c("mycondition","pro"),na.rm=T)%>% 
+  ggplot(aes(x=pro,y=acc))+
+  facet_wrap(~mycondition, labeller=as_labeller(c(regular="Regular",irregular="Irregular")))+
+  geom_bar(stat="identity",color="black",fill="#ededed",position=position_dodge(.9))+
+  geom_errorbar(aes(ymin = acc-ci,ymax = acc+ci),width=0,size=0.8,position=position_dodge(.9))+
+  geom_line(data=df.md.pro,aes(x=pro,y=acc,linetype=md,group=md,color=md),size=1)+
+  xlab("Focal Cause")+
+  # scale_y_continuous(limits = c(0,0.82))+
+    scale_color_manual(values=scales::alpha(c("#c77cff","#66A61E")))+
+  scale_linetype_manual(values = c("solid","twodash"))+
+  scale_x_discrete(labels=c("Generative","Non-causal","Preventative"))+
+  ylab("Accuracy")+
+  theme_classic()+  
+  theme(text = element_text(size=14),
+    axis.text=element_text(colour="black"),
+    strip.text.x = element_text(size = 14),
+    panel.grid.major = element_line(color = "#ededed"),
+    # strip.background =element_rect(fill="white",color="white"),
+    legend.position = "bottom",legend.title=element_blank())+
+  theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.margin=margin(-5,0,0,0))
+ggsave(file="exp_ACC.pdf",width = 7,height = 5)
+```
+
+```{r}
+df.pairACC %>%
+  summarySE(measurevar = "acc",groupvars = c("mycondition","paired","subject"),na.rm=T)%>% 
+  summarySE(measurevar = "acc",groupvars = c("mycondition","paired"),na.rm=T)%>% 
+  ggplot(aes(x=paired,y=acc))+
+  facet_wrap(~mycondition, labeller=as_labeller(c(regular="Regular",irregular="Irregular")))+
+  geom_bar(stat="identity",color="black",fill="#ededed",position=position_dodge(.9))+
+  geom_errorbar(aes(ymin = acc-ci,ymax = acc+ci),width=0,size=0.8,position=position_dodge(.9))+
+  geom_line(data=df.md.pair,aes(x=paired,y=acc,linetype=md,group=md,color=md),size=1)+
+  xlab("Neighboring Cause")+
+  scale_y_continuous(limits = c(0,0.82))+
+    scale_color_manual(values=scales::alpha(c("#c77cff","#66A61E")))+
+  scale_linetype_manual(values = c("solid","twodash"))+
+  scale_x_discrete(labels=c("Generative","Non-causal","Preventative"))+
+  ylab("Accuracy")+
+  theme_classic()+  
+  theme(text = element_text(size=14),
+    axis.text=element_text(colour="black"),
+    strip.text.x = element_text(size = 14),
+    panel.grid.major = element_line(color = "#ededed"),
+    # strip.background =element_rect(fill="white",color="white"),
+    legend.position = "bottom",legend.title=element_blank())+
+  theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        legend.margin=margin(-5,0,0,0))
+ggsave(file="exp_pairedACC.pdf",width = 7,height = 5)
+```
+
+##f1 check
+```{r}
+myF1<-function(d,l){
+  rec=nrow(subset(d,pro==l&state==l))/nrow(subset(d,pro==l))
+  pre=nrow(subset(d,pro==l&state==l))/nrow(subset(d,state==l))
+  return(list(rec,pre,2*(rec*pre)/(rec+pre)))
+}
+
+df.link=df.comb %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state))
+
+df.f1=data.frame() 
+for (k in unique(df.comb$subject)){
+  df=data.frame(subject=k,state=c("G","N","P"),f1=NA,rec=NA,pre=NA)
+  d=df.link[df.link$subject==k,]
+  df=df %>% mutate(mycondition=d$mycondition[1],exp=d$exp[1])
+  for (m in 1:nrow(df)){
+    re=myF1(d,df$state[m])
+    df$rec[m]=re[[1]];df$pre[m]=re[[2]];df$f1[m]=re[[3]]
+  }
+  df.f1=rbind(df.f1,df)
+}
+
+df.f1.wide=df.f1 %>% 
+  reshape2:: dcast(subject+mycondition+exp~ state,value.var = "f1") %>% rename(replace = c("G" = "S1","N" = "S2","P" ="S3"))
+
+df.f1.wide %>% 
+  MANOVA(dvs="S1:S3", dvs.pattern="S(.)",within=c("S")) %>%EMMEANS("S")
+```
+
+# confusion matrix
+```{r}
+myMatPlot<-function(d){
+  d1=d %>%
+      group_by(mycondition,pro,state)%>%
+      dplyr::summarise(n=n())
+  d1= expand.grid(state=c("G","N","P"),
+                  pro=c("G","N","P"),
+                  mycondition=c("regular","irregular"),
+                  fi=0
+                  ) %>% merge(d1,by=c("mycondition","pro","state"),all = T)
+  
+  d1$n=pmax(d1$n,d1$fi,na.rm=T)
+  
+  d2=d1%>% group_by(mycondition,pro)%>%
+      dplyr::summarise(sum=sum(n))
+  
+  d1$prob = d1$n/rep(d2$sum,each=3)
+  d1$mylabel=paste( round(d1$prob,2)*100,"%",sep="")
+  d1$label_col=ifelse(d1$prob>0.4,"1","0")
+  
+  d1%>%
+  mutate(mycondition=factor(mycondition,levels = c("regular","irregular"),labels = c("Regular","Irregular")))%>%
+  ggplot(aes(x=pro, y=state, fill=prob)) + 
+  # facet_grid(rows=vars(mycondition))+
+  facet_wrap(~mycondition,ncol=1)+
+  geom_tile()+
+  geom_text(aes(label = mylabel,color=label_col),size=7)+
+  scale_color_manual(values = c("black","white"),guide="none")+
+  scale_fill_gradientn(colours = c("white","black"))+
+  theme_bw()+
+  xlab("Ground Truth")+
+  ylab("People")+  
+  theme_bw()+  
+  theme(text = element_text(size=18),
+    axis.text=element_text(colour="black"),
+    strip.text.x = element_text(size = 15),
+    panel.grid = element_blank(),
+    strip.background =element_rect(fill="white",color="white"),
+    legend.position ="none")
+}
+
+df.comb %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state))%>%
+  myMatPlot()
+
+# ggsave(file="exp_mat_ppl.pdf",width = 4,height = 7)
+
+md.sim[["nor"]] %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(mutate(md.sim[["nor"]],pro=B_pro,state=B_state))%>%  myMatPlot()+
+  ylab("Normative")
+
+# ggsave(file="exp_mat_nor.pdf",width = 4,height = 7)
+
+md.sim[["feai"]] %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(mutate(md.sim[["feai"]],pro=B_pro,state=B_state))%>%  myMatPlot()+
+  ylab("Summary-statistic")
+
+# ggsave(file="exp_mat_feai.pdf",width = 4,height = 7)
+```
+
+```{r}
+d1=df.comb %>% mutate(pro=A_pro,state=A_state)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,state=B_state))%>%
+      group_by(mycondition,pro,state)%>%
+      dplyr::summarise(n=n())
+
+x=d1 %>% filter(pro=="G"& state!="G" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="N"& state!="N" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="P"& state!="P" & mycondition=="regular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="G"& state!="G" & mycondition=="irregular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="N"& state!="N" & mycondition=="irregular")
+chisq.test(x$n)
+x=d1 %>% filter(pro=="P"& state!="P" & mycondition=="irregular")
+chisq.test(x$n)
+```
+
+# ANOVA two (order effect)
+
+## 3(focal) * 3(order) * 2(regularity)
+```{r}
+df.ordACC=df.comb %>% mutate(pro=A_pro,ord=order_a,acc=acc_a)%>%
+  rbind(df.comb %>% mutate(pro=B_pro,ord=order_b,acc=acc_b))
+
+df.ordACC.wide=df.ordACC %>% reshape2:: dcast(subject+mycondition+exp~pro+ord,value.var = "acc",fun=mean)%>% 
+  rename(replace = c("G_0" = "G1L1","G_1"="G1L2","G_2" ="G1L3",
+                     "N_0" = "G2L1","N_1"="G2L2","N_2" ="G2L3",
+                     "P_0" = "G3L1","P_1"="G3L2","P_2" ="G3L3"
+                     ))
+
+df.ordACC.wide %>% 
+  MANOVA(dvs="G1L1:G3L3", dvs.pattern="G(.)L(.)",within=c("G","L"),between=c("mycondition"))%>%
+  EMMEANS("L")%>%
+  EMMEANS("L",by="G")
+```
+
+```{r}
+df.ordMdACC=data.frame()
+for (k in 1:length(md.sim)){
+    df=expand.grid(
+      ord=c(0,1,2),
+      pro=c("G","N","P")) %>% 
+    mutate(md=names(md.sim)[k])
+
+  for (m in 1:nrow(df)){
+    d1=md.sim[[k]] %>% subset(order_a == df$ord[m] & A_pro==df$pro[m])
+    d2=md.sim[[k]] %>% subset(order_b == df$ord[m] & B_pro==df$pro[m])
+    
+    df$acc[m]=mean(c(d1$acc_a,d2$acc_b))
+  }
+  df.ordMdACC=rbind(df.ordMdACC,df)
+}
+
+df.ordMdACC=df.ordMdACC %>% 
+    mutate(md=factor(md,levels=c("nor","feai"),
+         labels=c("Normative","Summary-statistic")),
+         ord=factor(ord,labels = c("Interleaved","Medium","Clustered"))
+         )
+```
+
+```{r}
+df.ordACC %>%
+  summarySE(measurevar = "acc",groupvars = c("pro","ord","subject"),na.rm=T)%>% 
+  summarySE(measurevar = "acc",groupvars = c("pro","ord"),na.rm=T)%>% 
+  mutate(ord=factor(ord,levels=c(0,1,2),labels = c("Interleaved","Medium","Clustered")))%>%
+  ggplot(aes(x=ord,y=acc))+
+  geom_bar(stat="identity",color="black",fill="#ededed")+
+  geom_errorbar(aes(ymin = acc-ci,ymax = acc+ci),width=0,size=0.8,color="black")+
+  facet_wrap(~pro,labeller=as_labeller(c(G="Generative",N="Non-causal",P="Preventative")))+
+# +
+  # geom_point(data=df.ordMdACCcomb,aes(x=ord,y=acc,color=md,shape=md),size=3.3)+
+  geom_line(data=df.ordMdACC,aes(x=ord,y=acc,color=md,group=md,linetype=md),size=1)+
+    scale_color_manual(values=scales::alpha(c("#c77cff","#66A61E")))+
+  scale_linetype_manual(values = c("solid","twodash"))+
+  xlab("Intervention Order")+
+  theme_classic()+
+  ylab("Accuracy")+
+  theme(text = element_text(size=12),
+  axis.text=element_text(colour="black"),
+  strip.text.x = element_text(size = 12),
+  legend.position = "bottom",
+  legend.title=element_blank())+
+  theme(axis.title.x = element_text(margin = margin(t = 5, r = 0, b = 0, l = 0)),
+        axis.ticks.x = element_blank(),
+         panel.grid.major = element_line(color = "#ededed"),
+    legend.margin=margin(-10,0,0,0))
+
+ggsave(file="f_exp_ord.pdf",width = 7,height = 3.8)
+```
+
+#no ground truth trials
+##scatter plot
+```{r}
+id_str=c("GG","GN","GP","NG","NN","NP","PG","PN","PP")
+df.pic=expand.grid(uni_seed=unique(md.sim1[["nor"]]$uni_seed),
+                   mycondition=c("regular","irregular"),
+                   id=c(1:9),comp=c("A","B"),choi=c("G","N","P"),ppl=0,
+                   nor=0,ss=0)
+for (k in 1:nrow(df.pic)){
+  x=df.comb1 %>% subset(mycondition==df.pic$mycondition[k]&
+                    uni_seed==df.pic$uni_seed[k]&
+                    trial_type==id_str[df.pic$id[k]]) 
+  if(df.pic$comp[k]=="A"){
+    df.pic$ppl[k]=sum(x$A_state==df.pic$choi[k])
+  }else{
+    df.pic$ppl[k]=sum(x$B_state==df.pic$choi[k])
+  }
+  
+  x=md.sim1[["nor"]] %>% subset(mycondition==df.pic$mycondition[k]&
+                    uni_seed==df.pic$uni_seed[k]&
+                    trial_type==id_str[df.pic$id[k]]) 
+  
+  if(df.pic$comp[k]=="A"){
+    df.pic$nor[k]=sum(x$A_state==df.pic$choi[k])
+  }else{
+    df.pic$nor[k]=sum(x$B_state==df.pic$choi[k])
+  }
+  
+  x=md.sim1[["feai"]] %>% subset(mycondition==df.pic$mycondition[k]&
+                    uni_seed==df.pic$uni_seed[k]&
+                    trial_type==id_str[df.pic$id[k]]) 
+  
+  if(df.pic$comp[k]=="A"){
+    df.pic$ss[k]=sum(x$A_state==df.pic$choi[k])
+  }else{
+    df.pic$ss[k]=sum(x$B_state==df.pic$choi[k])
+  }
+}
+# save(df.pic,file="df.pointpic.Rda")
+load("df.pointpic.Rda")
+
+df=df.pic %>%
+  mutate(uni_id=paste(uni_seed,id,comp,mycondition,sep="_"))%>% 
+  as.data.table()
+df[,sumppl:=sum(ppl),by="uni_id"]
+df[,sumnor:=sum(nor),by="uni_id"]
+df[,sumss:=sum(ss),by="uni_id"]
+df[,prob:=ppl/sumppl]
+df[,prob_nor:=nor/sumnor]
+df[,prob_ss:=ss/sumss]
+
+df$block="No Ground Truth"
+df$block[which(grepl('exp1a', df$uni_seed)| !grepl('exp1b_10|exp1b_11|exp1b_12', df$uni_seed))]="Ground Truth"
+
+df2=df %>% 
+  pivot_longer(cols = c("prob_nor","prob_ss"),
+               names_to="md",
+               values_to="prob_md")
+```
+
+
+```{r}
+  df2 %>% 
+    subset(block=="No Ground Truth") %>% 
+    mutate(md=factor(md,levels=c("prob_nor","prob_ss"),labels= c("Normative","Summary-statistic")))%>%
+    ggplot(aes(x=prob_md,y=prob,color=choi))+
+    # facet_grid(rows=vars(block),cols = vars(md),scales="free_x")+
+    facet_grid(~md,scales="free_x")+
+    geom_point(alpha=0.4,size=1.5)+
+    ylab("Human")+
+    xlab("Model-based Learner")+
+      scale_color_manual(values=c("#66A61E","#666666","#E6AB02"),
+                      labels =  c("Generative ","Non-causal ","Preventative "))+
+    geom_smooth(method = "lm")+
+    theme_classic()+
+    # scale_x_continuous(limits = c(0,0.9))+
+    scale_y_continuous(limits = c(0,1))+
+    theme(text = element_text(size=12),
+        axis.text=element_text(colour="black"),
+        legend.title =element_blank(),
+        legend.position = "bottom")
+
+
+ggsave(file="exp_point.pdf",width = 7,height = 4)
+
+d1=df2%>% filter(block=="No Ground Truth" & md=="prob_ss" & choi=="N")
+cor(d1$prob,d1$prob_md)
+```
+
+

@@ -82,6 +82,10 @@ MyValidPath<-function(all_path_mtx,sig_path){
   return(valid_path)
 }
 
+MyCumu<-function(prob,len){ #cumulative probability
+  sum(prob*len)
+}
+
 MyHidden <- function(glist,plist,sqc,k_e,r_e,pe_time,t1,t0,k_pe,r_pe,k_ge,r_ge){
   #for E->->E
   #no hidden baserate
@@ -90,6 +94,8 @@ MyHidden <- function(glist,plist,sqc,k_e,r_e,pe_time,t1,t0,k_pe,r_pe,k_ge,r_ge){
   #using approximation approach
   p_between=sqc %>% subset(time>t0 & time<t1 & obj %in% plist)
   Time=seq(t0,t1, length.out = sampling_point)
+  len=(t1-t0)/length(Time)
+  
   df.sample=data.frame(Time)
   if (nrow(p_between)>0){
       if (length(plist)>1){
@@ -110,36 +116,33 @@ MyHidden <- function(glist,plist,sqc,k_e,r_e,pe_time,t1,t0,k_pe,r_pe,k_ge,r_ge){
     df.sample[,"prevent"]=(1-rowProds(data.matrix(df.sample.dup))) # noisy-or, 1 minus the product all that cannot prevent
     #one-hidden effect
     hidden1=dgamma(Time-t0,shape=k_e, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*dgamma(t1-t0,shape=k_e*2, rate=r_e)
+    prob_segment=    MyCumu(hidden1,len)*dgamma(t1-t0,shape=k_e*2, rate=r_e)
     prob_sub_e=prob_sub_e+prob_segment
     
     hidden1=dgamma(Time-t0,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-t0,shape=k_e*2, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*dgamma(t1-t0,shape=k_e*3, rate=r_e)
+    prob_segment= MyCumu(hidden1,len)*MyCumu(hidden2,len)*dgamma(t1-t0,shape=k_e*3, rate=r_e)
     prob_sub_e=prob_sub_e+prob_segment
     
     hidden1=dgamma(Time-t0,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-t0,shape=k_e*2, rate=r_e)*df.sample$prevent
     hidden3=dgamma(Time-t0,shape=k_e*3, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*dgamma(t1-t0,shape=k_e*4, rate=r_e)
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*MyCumu(hidden3,len)*dgamma(t1-t0,shape=k_e*4, rate=r_e)
     prob_sub_e=prob_sub_e+prob_segment
     
     hidden1=dgamma(Time-t0,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-t0,shape=k_e*2, rate=r_e)*df.sample$prevent
     hidden3=dgamma(Time-t0,shape=k_e*3, rate=r_e)*df.sample$prevent
     hidden4=dgamma(Time-t0,shape=k_e*4, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*max(summary(ecdf(hidden4)))*dgamma(t1-t0,shape=k_e*5, rate=r_e)
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*MyCumu(hidden3,len)*MyCumu(hidden4,len)*dgamma(t1-t0,shape=k_e*5, rate=r_e)
     prob_sub_e=prob_sub_e+prob_segment
-
+    
     hidden1=dgamma(Time-t0,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-t0,shape=k_e*2, rate=r_e)*df.sample$prevent
     hidden3=dgamma(Time-t0,shape=k_e*3, rate=r_e)*df.sample$prevent
     hidden4=dgamma(Time-t0,shape=k_e*4, rate=r_e)*df.sample$prevent
     hidden5=dgamma(Time-t0,shape=k_e*5, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*max(summary(ecdf(hidden4)))*max(summary(ecdf(hidden5)))*dgamma(t1-t0,shape=k_e*6, rate=r_e)
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*MyCumu(hidden3,len)*MyCumu(hidden4,len)*MyCumu(hidden5,len)*dgamma(t1-t0,shape=k_e*6, rate=r_e)
     prob_sub_e=prob_sub_e+prob_segment
   }
   return(prob_sub_e)
@@ -155,6 +158,7 @@ MyEndHidden <- function(glist,plist,sqc,k_e,r_e,e_index,pe_time,k_pe,r_pe,k_ge,r
   #using approximation approach
   p_between=sqc %>% subset(time>e_time & time<trial_end & obj %in% plist)
   Time=seq(e_time,trial_end, length.out = sampling_point)
+  len=(trial_end-e_time)/length(Time)
   df.sample=data.frame(Time)
   if (nrow(p_between)>0){
       if (length(plist)>1){
@@ -169,34 +173,34 @@ MyEndHidden <- function(glist,plist,sqc,k_e,r_e,e_index,pe_time,k_pe,r_pe,k_ge,r
         df.sample[df.sample$Time<p_time,col]=1 #before P happens, definitely cannot prevent 
         df.sample[df.sample$Time>pe_time[pe_cut_index[m]],col]=1 #After Another E happens, definitely cannot prevent 
       }
-  
+    
     df.sample.dup=df.sample
     df.sample.dup$Time=NULL
     df.sample[,"prevent"]=(1-rowProds(data.matrix(df.sample.dup))) # noisy-or, 1 minus the product all that cannot prevent
     #one-hidden effect
     hidden1=dgamma(Time-e_time,shape=k_e, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*(1-pgamma(trial_end-e_time,shape=k_e*2, rate=r_e))
+    prob_segment=MyCumu(hidden1,len)*(1-pgamma(trial_end-e_time,shape=k_e*2, rate=r_e))
     prob_sub=prob_sub+prob_segment
     
     hidden1=dgamma(Time-e_time,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-e_time,shape=k_e*2, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*
       (1-pgamma(trial_end-e_time,shape=k_e*3, rate=r_e))
     prob_sub=prob_sub+prob_segment
     
     hidden1=dgamma(Time-e_time,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-e_time,shape=k_e*2, rate=r_e)*df.sample$prevent
     hidden3=dgamma(Time-e_time,shape=k_e*3, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*(1-pgamma(trial_end-e_time,shape=k_e*4, rate=r_e))
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*
+      MyCumu(hidden3,len)*(1-pgamma(trial_end-e_time,shape=k_e*4, rate=r_e))
     prob_sub=prob_sub+prob_segment
     
     hidden1=dgamma(Time-e_time,shape=k_e, rate=r_e)*df.sample$prevent
     hidden2=dgamma(Time-e_time,shape=k_e*2, rate=r_e)*df.sample$prevent
     hidden3=dgamma(Time-e_time,shape=k_e*3, rate=r_e)*df.sample$prevent
     hidden4=dgamma(Time-e_time,shape=k_e*4, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*max(summary(ecdf(hidden4)))*(1-pgamma(trial_end-e_time,shape=k_e*5, rate=r_e))
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*
+      MyCumu(hidden3,len)*MyCumu(hidden4,len)*(1-pgamma(trial_end-e_time,shape=k_e*5, rate=r_e))
     prob_sub=prob_sub+prob_segment
     
     hidden1=dgamma(Time-e_time,shape=k_e, rate=r_e)*df.sample$prevent
@@ -204,8 +208,8 @@ MyEndHidden <- function(glist,plist,sqc,k_e,r_e,e_index,pe_time,k_pe,r_pe,k_ge,r
     hidden3=dgamma(Time-e_time,shape=k_e*3, rate=r_e)*df.sample$prevent
     hidden4=dgamma(Time-e_time,shape=k_e*4, rate=r_e)*df.sample$prevent
     hidden5=dgamma(Time-e_time,shape=k_e*5, rate=r_e)*df.sample$prevent
-    prob_segment=max(summary(ecdf(hidden1)))*max(summary(ecdf(hidden2)))*
-      max(summary(ecdf(hidden3)))*max(summary(ecdf(hidden4)))*max(summary(ecdf(hidden5)))*(1-pgamma(trial_end-e_time,shape=k_e*6, rate=r_e))
+    prob_segment=MyCumu(hidden1,len)*MyCumu(hidden2,len)*
+      MyCumu(hidden3,len)*MyCumu(hidden4,len)*MyCumu(hidden5,len)*(1-pgamma(trial_end-e_time,shape=k_e*6, rate=r_e))
     prob_sub=prob_sub+prob_segment
   }
   return(prob_sub)
@@ -301,6 +305,8 @@ MyActual <- function(glist,plist,sqc,valid_path,k_e,r_e,k_pe,r_pe,k_ge,r_ge){ #g
           prob_sub_g=1-pgamma(trial_end-cdd_time, shape=k_ge, rate=r_ge)
           
           Time=seq(0,whole_trial_end, length.out = sampling_point*10)
+          len=whole_trial_end/length(Time)
+          
           df.sample=data.frame(Time)
           
           for (q in p_index){
@@ -318,7 +324,7 @@ MyActual <- function(glist,plist,sqc,valid_path,k_e,r_e,k_pe,r_pe,k_ge,r_ge){ #g
           df.sample[,"prevent"]=(1-rowProds(data.matrix(df.sample.dup))) # noisy-or, 1 minus the product all that cannot prevent
           
           prevent_prob = (dgamma(Time-cdd_time, shape=k_ge, rate=r_ge))*df.sample$prevent
-          prob_sub_g=prob_sub_g+max(summary(ecdf(prevent_prob)))
+          prob_sub_g=prob_sub_g+MyCumu(prevent_prob,len)
           
           prob_sub=prob_sub*prob_sub_g
         }
