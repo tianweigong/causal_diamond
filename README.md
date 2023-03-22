@@ -2,7 +2,7 @@
 
 material for a project of how people learn generative and preventative causal structures in continuous time. 
 
-## :fire: IMPORTANT :fire: You can watch all stimuli [here](https://eco.ppls.ed.ac.uk/~s1940738/demo/diamond/).
+## :fire: IMPORTANT :fire: : You can watch all stimuli [here](https://eco.ppls.ed.ac.uk/~s1940738/demo/diamond/).
 
 
 ## Data_analysis
