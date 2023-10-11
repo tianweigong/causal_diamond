@@ -250,7 +250,7 @@ df.pairACC %>%
     legend.position = "bottom",legend.title=element_blank())+
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         legend.margin=margin(-5,0,0,0))
-ggsave(file="exp_ACC.pdf",width = 7,height = 5)
+# ggsave(file="exp_ACC.pdf",width = 7,height = 5)
 ```
 
 ```{r}
@@ -277,7 +277,7 @@ df.pairACC %>%
     legend.position = "bottom",legend.title=element_blank())+
   theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         legend.margin=margin(-5,0,0,0))
-ggsave(file="exp_pairedACC.pdf",width = 7,height = 5)
+# ggsave(file="exp_pairedACC.pdf",width = 7,height = 5)
 ```
 
 ##f1 check
@@ -461,7 +461,7 @@ df.ordACC %>%
          panel.grid.major = element_line(color = "#ededed"),
     legend.margin=margin(-10,0,0,0))
 
-ggsave(file="f_exp_ord.pdf",width = 7,height = 3.8)
+# ggsave(file="f_exp_ord.pdf",width = 7,height = 3.8)
 ```
 
 #no ground truth trials
@@ -526,8 +526,8 @@ df2=df %>%
 
 
 ```{r}
-  df2 %>% 
-    subset(block=="No Ground Truth") %>% 
+ df2 %>% 
+    subset(block=="No Ground Truth")%>% 
     mutate(md=factor(md,levels=c("prob_nor","prob_ss"),labels= c("Normative","Summary-statistic")))%>%
     ggplot(aes(x=prob_md,y=prob,color=choi))+
     # facet_grid(rows=vars(block),cols = vars(md),scales="free_x")+
@@ -547,7 +547,7 @@ df2=df %>%
         legend.position = "bottom")
 
 
-ggsave(file="exp_point.pdf",width = 7,height = 4)
+# ggsave(file="exp_point.pdf",width = 7,height = 4)
 
 d1=df2%>% filter(block=="No Ground Truth" & md=="prob_ss" & choi=="N")
 cor(d1$prob,d1$prob_md)

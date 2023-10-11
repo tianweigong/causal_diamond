@@ -9,8 +9,8 @@ source('fun_softmax.R')
 
 set.seed(2)
 
-load("exp2.Rda")
-load('mdall_exp2.Rda')
+load("exp1a.Rda")
+load('mdall_exp1a.Rda')
 
 #randomBIC
 round(2*nrow(df.final)*log(0.11))
